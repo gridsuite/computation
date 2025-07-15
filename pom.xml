@@ -44,30 +44,15 @@
     <properties>
         <spring-boot.version>3.3.3</spring-boot.version>
         <spring-cloud.version>2023.0.1</spring-cloud.version>
-        <spring.version>6.1.12</spring.version>
 
-        <lombok.version>1.18.34</lombok.version>
-        <jackson.version>2.15.2</jackson.version>
-        <jakarta.validation.version>3.0.2</jakarta.validation.version>
-        <jakarta.persistence.version>3.1.0</jakarta.persistence.version>
-
-        <org-apache-commons.version>4.4</org-apache-commons.version>
-
-        <junit.jupiter.version>5.10.2</junit.jupiter.version>
-        <org.hamcrest.version>2.2</org.hamcrest.version>
-        <org.mockito.version>5.11.0</org.mockito.version>
-        <assertj.version>3.24.2</assertj.version>
-        <jsonassert.version>1.5.1</jsonassert.version>
-
-        <powsybl-dependencies.version>2025.0.1</powsybl-dependencies.version>
+        <powsybl-dependencies.version>2025.0.2</powsybl-dependencies.version>
         <powsybl-network-store-client.version>1.27.2</powsybl-network-store-client.version>
 
-        <gridsuite-filter.version>1.6.0-SNAPSHOT</gridsuite-filter.version>
+        <lombok.version>1.18.34</lombok.version>
+        <org-apache-commons.version>4.4</org-apache-commons.version>
+        <org.hamcrest.version>2.2</org.hamcrest.version>
 
-        <aspectj.version>1.9.22.1</aspectj.version>
-        <micrometer.version>1.13.3</micrometer.version>
-        <spring-cloud-stream.version>4.1.1</spring-cloud-stream.version>
-        <spring-data-jpa.version>3.3.3</spring-data-jpa.version>
+        <gridsuite-filter.version>1.4.0</gridsuite-filter.version>
 
         <sonar.organization>gridsuite</sonar.organization>
         <sonar.projectKey>org.gridsuite:computation</sonar.projectKey>
@@ -130,22 +115,10 @@
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-params</artifactId>
-                <version>${junit.jupiter.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest</artifactId>
-                <version>${org.hamcrest.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>${org.mockito.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-core</artifactId>
-                <version>${assertj.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -170,50 +143,38 @@
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
-            <version>${jakarta.validation.version}</version>
         </dependency>
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
-            <version>${jakarta.persistence.version}</version>
         </dependency>
 
         <!-- Spring Framework -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-messaging</artifactId>
-            <version>${spring.version}</version>
         </dependency>
 
         <!-- Spring Data -->
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-jpa</artifactId>
-            <version>${spring-data-jpa.version}</version>
         </dependency>
 
         <!-- Spring Cloud -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-stream</artifactId>
-            <version>${spring-cloud-stream.version}</version>
         </dependency>
 
         <!-- AspectJ -->
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
-            <version>${aspectj.version}</version>
             <optional>true</optional>
         </dependency>
 
@@ -221,7 +182,6 @@
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-core</artifactId>
-            <version>${micrometer.version}</version>
             <optional>true</optional>
         </dependency>
 
@@ -275,7 +235,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>${org.mockito.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -290,6 +249,7 @@
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>
+            <version>${org.hamcrest.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -297,7 +257,6 @@
         <dependency>
             <groupId>org.skyscreamer</groupId>
             <artifactId>jsonassert</artifactId>
-            <version>${jsonassert.version}</version>
             <scope>test</scope>
         </dependency>
 
