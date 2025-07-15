@@ -1,0 +1,18 @@
+name: Patch
+
+on:
+  workflow_dispatch:
+    inputs:
+      branchRef:
+        description: 'Patch branch (format: release-vX.Y.Z)'
+        required: true
+        type: string
+
+jobs:
+  run-patch:
+    uses: powsybl/github-ci/.github/workflows/patch-backend-lib-generic.yml@39565de6fd7d394ed76fa09e5197ffb1350ff1e6
+    with:
+      githubappId: ${{ vars.GRIDSUITE_ACTIONS_APPID }}
+      branchRef: ${{ github.event.inputs.branchRef }}
+    secrets:
+      VERSIONBUMP_GHAPP_PRIVATE_KEY: ${{ secrets.VERSIONBUMP_GHAPP_PRIVATE_KEY }}
