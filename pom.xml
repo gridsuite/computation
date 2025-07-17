@@ -23,7 +23,7 @@
 
     <packaging>jar</packaging>
     <name>Computation library</name>
-    <description>A shared library for common computation and filter classes</description>
+    <description>Common library for common computation and result filtering.</description>
     <url>http://www.gridsuite.org/</url>
 
     <scm>
@@ -42,17 +42,16 @@
     </developers>
 
     <properties>
+        <powsybl-ws-dependencies.version>2.22.0</powsybl-ws-dependencies.version>
+        <powsybl-network-store-client.version>1.28.0</powsybl-network-store-client.version>
+        <gridsuite-filter.version>1.5.0</gridsuite-filter.version>
+
         <spring-boot.version>3.3.3</spring-boot.version>
         <spring-cloud.version>2023.0.1</spring-cloud.version>
-
-        <powsybl-dependencies.version>2025.0.2</powsybl-dependencies.version>
-        <powsybl-network-store-client.version>1.27.2</powsybl-network-store-client.version>
 
         <lombok.version>1.18.34</lombok.version>
         <org-apache-commons.version>4.4</org-apache-commons.version>
         <org.hamcrest.version>2.2</org.hamcrest.version>
-
-        <gridsuite-filter.version>1.4.0</gridsuite-filter.version>
 
         <sonar.organization>gridsuite</sonar.organization>
         <sonar.projectKey>org.gridsuite:computation</sonar.projectKey>
@@ -80,8 +79,8 @@
             <!-- Import -->
             <dependency>
                 <groupId>com.powsybl</groupId>
-                <artifactId>powsybl-dependencies</artifactId>
-                <version>${powsybl-dependencies.version}</version>
+                <artifactId>powsybl-ws-dependencies</artifactId>
+                <version>${powsybl-ws-dependencies.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
