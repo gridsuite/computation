@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+
+jobs:
+  build:
+    uses: powsybl/github-ci/.github/workflows/build-backend-lib-generic.yml@39565de6fd7d394ed76fa09e5197ffb1350ff1e6
+    with:
+      eventType: computation_updated
+    secrets:
+      sonar-token: ${{ secrets.SONAR_TOKEN }}
+      repo-token: ${{ secrets.REPO_ACCESS_TOKEN }}
