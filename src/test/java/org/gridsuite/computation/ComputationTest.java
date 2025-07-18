@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 import static org.gridsuite.computation.service.NotificationService.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -161,7 +162,10 @@ class ComputationTest implements WithAssertions {
         }
 
         @Override
-        protected void saveResult(Network network, AbstractResultContext<MockComputationRunContext> resultContext, Object result) { }
+        protected void saveResult(Network network, AbstractResultContext<MockComputationRunContext> resultContext, Object result) {
+            // Empty implementation - this is a mock/test implementation that doesn't need to persist results
+            // The actual result saving is handled by the real implementation or is not needed for testing
+        }
 
         @Override
         protected String getComputationType() {
@@ -258,7 +262,8 @@ class ComputationTest implements WithAssertions {
         runContext.setComputationResWanted(ComputationResultWanted.FAIL);
 
         // execution / cleaning
-        assertThrows(ComputationException.class, () -> workerService.consumeRun().accept(message));
+        Consumer<Message<String>> consumer = workerService.consumeRun();
+        assertThrows(ComputationException.class, () -> consumer.accept(message));
         assertNull(resultService.findStatus(RESULT_UUID));
     }
 

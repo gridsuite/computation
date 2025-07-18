@@ -71,6 +71,7 @@ public abstract class AbstractResultContext<C extends AbstractComputationRunCont
                 .build();
     }
 
+    @SuppressWarnings("unused")
     protected Map<String, String> getSpecificMsgHeaders(ObjectMapper ignoredObjectMapper) {
         return Map.of();
     }
