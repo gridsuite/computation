@@ -42,8 +42,8 @@
     </developers>
 
     <properties>
-        <powsybl-ws-dependencies.version>2.22.0</powsybl-ws-dependencies.version>
-        <gridsuite-filter.version>1.5.0</gridsuite-filter.version>
+        <powsybl-ws-dependencies.version>2.23.0</powsybl-ws-dependencies.version>
+        <gridsuite-filter.version>1.6.0</gridsuite-filter.version>
 
         <org-apache-commons.version>4.4</org-apache-commons.version>
         <org.hamcrest.version>2.2</org.hamcrest.version>
