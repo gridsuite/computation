@@ -324,16 +324,17 @@ class FilterServiceTest {
 
     @ParameterizedTest
     @MethodSource("fieldTypeData")
-    void shouldReturnCorrectFieldTypes(String methodType, EquipmentType equipmentType, List<FieldType> expectedFields) {
-        switch (methodType) {
-            case "nominal" -> when(filterService.getNominalVoltageFieldType(any())).thenCallRealMethod();
-            case "country" -> when(filterService.getCountryCodeFieldType(any())).thenCallRealMethod();
-            case "substation" -> when(filterService.getSubstationPropertiesFieldTypes(any())).thenCallRealMethod();
+    void shouldReturnCorrectFieldTypes(String category, EquipmentType equipmentType, List<FieldType> expectedFields) {
+        switch (category) {
+            case GlobalFilter.Fields.nominalV -> when(filterService.getNominalVoltageFieldType(any())).thenCallRealMethod();
+            case GlobalFilter.Fields.countryCode -> when(filterService.getCountryCodeFieldType(any())).thenCallRealMethod();
+            case GlobalFilter.Fields.substationProperty -> when(filterService.getSubstationPropertiesFieldTypes(any())).thenCallRealMethod();
+            default -> throw new IllegalArgumentException("Unknown category: " + category);
         }
-        List<FieldType> result = switch (methodType) {
-            case "nominal" -> filterService.getNominalVoltageFieldType(equipmentType);
-            case "country" -> filterService.getCountryCodeFieldType(equipmentType);
-            case "substation" -> filterService.getSubstationPropertiesFieldTypes(equipmentType);
+        List<FieldType> result = switch (category) {
+            case GlobalFilter.Fields.nominalV -> filterService.getNominalVoltageFieldType(equipmentType);
+            case GlobalFilter.Fields.countryCode -> filterService.getCountryCodeFieldType(equipmentType);
+            case GlobalFilter.Fields.substationProperty -> filterService.getSubstationPropertiesFieldTypes(equipmentType);
             default -> Collections.emptyList();
         };
         assertEquals(expectedFields, result);
@@ -342,20 +343,20 @@ class FilterServiceTest {
     private static Stream<Arguments> fieldTypeData() {
         return Stream.of(
                 // Nominal voltage
-                Arguments.of("nominal", EquipmentType.LINE, List.of(FieldType.NOMINAL_VOLTAGE_1, FieldType.NOMINAL_VOLTAGE_2)),
-                Arguments.of("nominal", EquipmentType.TWO_WINDINGS_TRANSFORMER, List.of(FieldType.NOMINAL_VOLTAGE_1, FieldType.NOMINAL_VOLTAGE_2)),
-                Arguments.of("nominal", EquipmentType.VOLTAGE_LEVEL, List.of(FieldType.NOMINAL_VOLTAGE)),
-                Arguments.of("nominal", EquipmentType.GENERATOR, Collections.emptyList()),
+                Arguments.of(GlobalFilter.Fields.nominalV, EquipmentType.LINE, List.of(FieldType.NOMINAL_VOLTAGE_1, FieldType.NOMINAL_VOLTAGE_2)),
+                Arguments.of(GlobalFilter.Fields.nominalV, EquipmentType.TWO_WINDINGS_TRANSFORMER, List.of(FieldType.NOMINAL_VOLTAGE_1, FieldType.NOMINAL_VOLTAGE_2)),
+                Arguments.of(GlobalFilter.Fields.nominalV, EquipmentType.VOLTAGE_LEVEL, List.of(FieldType.NOMINAL_VOLTAGE)),
+                Arguments.of(GlobalFilter.Fields.nominalV, EquipmentType.GENERATOR, Collections.emptyList()),
 
                 // Country code
-                Arguments.of("country", EquipmentType.VOLTAGE_LEVEL, List.of(FieldType.COUNTRY)),
-                Arguments.of("country", EquipmentType.TWO_WINDINGS_TRANSFORMER, List.of(FieldType.COUNTRY)),
-                Arguments.of("country", EquipmentType.LINE, List.of(FieldType.COUNTRY_1, FieldType.COUNTRY_2)),
-                Arguments.of("country", EquipmentType.GENERATOR, Collections.emptyList()),
+                Arguments.of(GlobalFilter.Fields.countryCode, EquipmentType.VOLTAGE_LEVEL, List.of(FieldType.COUNTRY)),
+                Arguments.of(GlobalFilter.Fields.countryCode, EquipmentType.TWO_WINDINGS_TRANSFORMER, List.of(FieldType.COUNTRY)),
+                Arguments.of(GlobalFilter.Fields.countryCode, EquipmentType.LINE, List.of(FieldType.COUNTRY_1, FieldType.COUNTRY_2)),
+                Arguments.of(GlobalFilter.Fields.countryCode, EquipmentType.GENERATOR, Collections.emptyList()),
 
                 // Substation properties
-                Arguments.of("substation", EquipmentType.LINE, List.of(FieldType.SUBSTATION_PROPERTIES_1, FieldType.SUBSTATION_PROPERTIES_2)),
-                Arguments.of("substation", EquipmentType.GENERATOR, List.of(FieldType.SUBSTATION_PROPERTIES))
+                Arguments.of(GlobalFilter.Fields.substationProperty, EquipmentType.LINE, List.of(FieldType.SUBSTATION_PROPERTIES_1, FieldType.SUBSTATION_PROPERTIES_2)),
+                Arguments.of(GlobalFilter.Fields.substationProperty, EquipmentType.GENERATOR, List.of(FieldType.SUBSTATION_PROPERTIES))
         );
     }
 
