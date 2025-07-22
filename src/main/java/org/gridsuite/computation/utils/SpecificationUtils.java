@@ -15,6 +15,7 @@ package org.gridsuite.computation.utils;
 
 import com.google.common.collect.Lists;
 import jakarta.persistence.criteria.*;
+import lombok.extern.slf4j.Slf4j;
 import org.gridsuite.computation.dto.ResourceFilterDTO;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
@@ -32,6 +33,7 @@ import static org.springframework.data.jpa.domain.Specification.not;
  *
  * @author Kevin Le Saulnier <kevin.lesaulnier@rte-france.com>
  */
+@Slf4j
 public final class SpecificationUtils {
   /**
    * Maximum values per IN clause chunk to avoid StackOverflow exceptions.
@@ -40,6 +42,11 @@ public final class SpecificationUtils {
     public static final int MAX_IN_CLAUSE_SIZE = 500;
 
     public static final String FIELD_SEPARATOR = ".";
+
+    public static final int CHUNK_SIZE = 10000; // prefer less than 1000 for Oracle DB / good compromise for Postgres
+
+    private static final String WARN_UNEXPECTED_TYPE_ENCOUNTERED_FOR = "Unexpected type encountered for {} : {} - {}";
+
 
     // Utility class, so no constructor
     private SpecificationUtils() { }
@@ -52,6 +59,11 @@ public final class SpecificationUtils {
                     .as(String.class),
                 value.toUpperCase()
         );
+    }
+
+    public static <X> Specification<X> in(String field, List<String> values) {
+        return (root, cq, cb) ->
+                getColumnPath(root, field).in(values);
     }
 
     public static <X> Specification<X> notEqual(String field, String value) {
@@ -129,6 +141,75 @@ public final class SpecificationUtils {
         }
 
         return completedSpecification;
+    }
+
+    /**
+     * Better use and abuse from built-in performance of IN clause in Postgresql
+     * TODO : suppress when reported in appendFiltersToSpecification - test phase for shortcircuit results
+     * @param specification : specification to complement
+     * @param resourceFilters : filters to add in IN clause
+     * @return : new specification with "AND (field IN (?, ?, ..., ?))"
+     * @param <X>
+     */
+    public static <X> Specification<X> appendInTextClauseToSpecification(Specification<X> specification, List<ResourceFilterDTO> resourceFilters) {
+        Objects.requireNonNull(specification);
+        if (resourceFilters != null && !resourceFilters.isEmpty()) {
+            Specification<X> completedSpecification = specification;
+
+            for (ResourceFilterDTO resourceFilter : resourceFilters) {
+                if (resourceFilter.dataType() == ResourceFilterDTO.DataType.TEXT) {
+                    completedSpecification = appendInTextFilterToSpecification(completedSpecification, resourceFilter);
+                } else {
+                    doLogWarn(resourceFilter);
+                }
+            }
+
+            return completedSpecification;
+        } else {
+            return specification;
+        }
+    }
+
+    /*
+    TODO : suppress when reported in appendTextFilterToSpecification - test phase for shortcircuit results
+     */
+    private static <X> Specification<X> appendInTextFilterToSpecification(Specification<X> specification, ResourceFilterDTO resourceFilter) {
+        Specification<X> completedSpecification = specification;
+        if (resourceFilter.type() == ResourceFilterDTO.Type.IN) {
+            if (resourceFilter.value() instanceof Collection<?> valueList) {
+                List<String> inValues = valueList.stream().map(Object::toString).toList();
+                completedSpecification = specification.and(generateInClauseSpecification(resourceFilter.column(), inValues));
+            } else {
+                doLogWarn(resourceFilter);
+            }
+        } else {
+            doLogWarn(resourceFilter);
+        }
+
+        return completedSpecification;
+    }
+
+    /*
+    TODO : suppress when reported in generateInSpecification - test phase for shortcircuit results
+     */
+    private static <X> Specification<X> generateInClauseSpecification(String column, List<String> inPossibleValues) {
+        if (inPossibleValues.size() > CHUNK_SIZE) {
+            List<List<String>> chunksOfInValues = Lists.partition(inPossibleValues, CHUNK_SIZE);
+            Specification<X> containerSpec = null;
+
+            for (List<String> chunk : chunksOfInValues) {
+                Specification<X> multiOrEqualSpec = Specification.anyOf(in(column, chunk));
+                if (containerSpec == null) {
+                    containerSpec = multiOrEqualSpec;
+                } else {
+                    containerSpec = containerSpec.or(multiOrEqualSpec);
+                }
+            }
+
+            return containerSpec;
+        } else {
+            return Specification.anyOf(in(column, inPossibleValues));
+        }
     }
 
     @NotNull
@@ -263,5 +344,9 @@ public final class SpecificationUtils {
         } else {
             return root.get(dotSeparatedFields);
         }
+    }
+
+    private static void doLogWarn(ResourceFilterDTO resourceFilter) {
+        log.warn(WARN_UNEXPECTED_TYPE_ENCOUNTERED_FOR, resourceFilter.column(), resourceFilter.type(), resourceFilter.dataType());
     }
 }
