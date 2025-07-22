@@ -47,7 +47,6 @@ public final class SpecificationUtils {
 
     private static final String WARN_UNEXPECTED_TYPE_ENCOUNTERED_FOR = "Unexpected type encountered for {} : {} - {}";
 
-
     // Utility class, so no constructor
     private SpecificationUtils() { }
 
