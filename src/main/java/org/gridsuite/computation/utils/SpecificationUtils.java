@@ -35,17 +35,13 @@ import static org.springframework.data.jpa.domain.Specification.not;
  */
 @Slf4j
 public final class SpecificationUtils {
-  /**
-   * Maximum values per IN clause chunk to avoid StackOverflow exceptions.
-   * Current value (500) is a safe default but can be changed
-   */
-    public static final int MAX_IN_CLAUSE_SIZE = 500;
 
     public static final String FIELD_SEPARATOR = ".";
 
-    public static final int CHUNK_SIZE = 10000; // prefer less than 1000 for Oracle DB / good compromise for Postgres
-
-    private static final String WARN_UNEXPECTED_TYPE_ENCOUNTERED_FOR = "Unexpected type encountered for {} : {} - {}";
+    /**
+    Prefer less than 1000 for Oracle DB / good compromise for Postgres
+     */
+    public static final int MAX_IN_CLAUSE_SIZE = 10000;
 
     // Utility class, so no constructor
     private SpecificationUtils() { }
@@ -62,7 +58,7 @@ public final class SpecificationUtils {
 
     public static <X> Specification<X> in(String field, List<String> values) {
         return (root, cq, cb) ->
-                getColumnPath(root, field).in(values);
+                cb.upper(getColumnPath(root, field).as(String.class)).in(values);
     }
 
     public static <X> Specification<X> notEqual(String field, String value) {
@@ -142,95 +138,32 @@ public final class SpecificationUtils {
         return completedSpecification;
     }
 
-    /**
-     * Better use and abuse from built-in performance of IN clause in Postgresql
-     * TODO : suppress when reported in appendFiltersToSpecification - test phase for shortcircuit results
-     * @param specification : specification to complement
-     * @param resourceFilters : filters to add in IN clause
-     * @return : new specification with "AND (field IN (?, ?, ..., ?))"
-     * @param <X>
-     */
-    public static <X> Specification<X> appendInTextClauseToSpecification(Specification<X> specification, List<ResourceFilterDTO> resourceFilters) {
-        Objects.requireNonNull(specification);
-        if (resourceFilters != null && !resourceFilters.isEmpty()) {
-            Specification<X> completedSpecification = specification;
-
-            for (ResourceFilterDTO resourceFilter : resourceFilters) {
-                if (resourceFilter.dataType() == ResourceFilterDTO.DataType.TEXT) {
-                    completedSpecification = appendInTextFilterToSpecification(completedSpecification, resourceFilter);
-                } else {
-                    doLogWarn(resourceFilter);
-                }
-            }
-
-            return completedSpecification;
-        } else {
-            return specification;
-        }
-    }
-
-    /*
-    TODO : suppress when reported in appendTextFilterToSpecification - test phase for shortcircuit results
-     */
-    private static <X> Specification<X> appendInTextFilterToSpecification(Specification<X> specification, ResourceFilterDTO resourceFilter) {
-        Specification<X> completedSpecification = specification;
-        if (resourceFilter.type() == ResourceFilterDTO.Type.IN) {
-            if (resourceFilter.value() instanceof Collection<?> valueList) {
-                List<String> inValues = valueList.stream().map(Object::toString).toList();
-                completedSpecification = specification.and(generateInClauseSpecification(resourceFilter.column(), inValues));
-            } else {
-                doLogWarn(resourceFilter);
-            }
-        } else {
-            doLogWarn(resourceFilter);
-        }
-
-        return completedSpecification;
-    }
-
-    /*
-    TODO : suppress when reported in generateInSpecification - test phase for shortcircuit results
-     */
-    private static <X> Specification<X> generateInClauseSpecification(String column, List<String> inPossibleValues) {
-        if (inPossibleValues.size() > CHUNK_SIZE) {
-            List<List<String>> chunksOfInValues = Lists.partition(inPossibleValues, CHUNK_SIZE);
-            Specification<X> containerSpec = null;
-
-            for (List<String> chunk : chunksOfInValues) {
-                Specification<X> multiOrEqualSpec = Specification.anyOf(in(column, chunk));
-                if (containerSpec == null) {
-                    containerSpec = multiOrEqualSpec;
-                } else {
-                    containerSpec = containerSpec.or(multiOrEqualSpec);
-                }
-            }
-
-            return containerSpec;
-        } else {
-            return Specification.anyOf(in(column, inPossibleValues));
-        }
-    }
-
     @NotNull
     private static <X> Specification<X> appendTextFilterToSpecification(Specification<X> specification, ResourceFilterDTO resourceFilter) {
         Specification<X> completedSpecification = specification;
 
         switch (resourceFilter.type()) {
-            case NOT_EQUAL, EQUALS, IN -> {
+            case NOT_EQUAL, EQUALS -> {
+                if (resourceFilter.value() == null) {
+                    // if the value is null, we build an impossible specification (trick to remove later on ?)
+                    completedSpecification = completedSpecification.and(not(completedSpecification));
+                } else {
+                    completedSpecification = completedSpecification.and(equals(resourceFilter.column(), resourceFilter.value().toString()));
+                }
+            }
+            case IN -> {
                 // this type can manage one value or a list of values (with OR)
                 if (resourceFilter.value() instanceof Collection<?> valueList) {
                     // implicitly an IN resourceFilter type because only IN may have value lists as filter value
                     List<String> inValues = valueList.stream()
                             .map(Object::toString)
+                            .map(String::toUpperCase)
                             .toList();
-                    completedSpecification = completedSpecification.and(
-                            generateInSpecification(resourceFilter.column(), inValues)
+                    completedSpecification = completedSpecification.and(generateInSpecification(resourceFilter.column(), inValues)
                     );
                 } else if (resourceFilter.value() == null) {
                     // if the value is null, we build an impossible specification (trick to remove later on ?)
                     completedSpecification = completedSpecification.and(not(completedSpecification));
-                } else {
-                    completedSpecification = completedSpecification.and(equals(resourceFilter.column(), resourceFilter.value().toString()));
                 }
             }
             case CONTAINS -> {
@@ -263,32 +196,17 @@ public final class SpecificationUtils {
     * @return a specification for the IN clause
     */
     private static <X> Specification<X> generateInSpecification(String column, List<String> inPossibleValues) {
-
-        if (inPossibleValues.size() > MAX_IN_CLAUSE_SIZE) {
-            // there are too many values for only one call to anyOf() : it might cause a StackOverflow
-            // => the specification is divided into several specifications which have an OR between them :
-            List<List<String>> chunksOfInValues = Lists.partition(inPossibleValues, MAX_IN_CLAUSE_SIZE);
-            Specification<X> containerSpec = null;
-            for (List<String> chunk : chunksOfInValues) {
-                Specification<X> multiOrEqualSpec = anyOf(
-                        chunk
-                                .stream()
-                                .map(value -> SpecificationUtils.<X>equals(column, value))
-                                .toList()
-                );
-                if (containerSpec == null) {
-                    containerSpec = multiOrEqualSpec;
-                } else {
-                    containerSpec = containerSpec.or(multiOrEqualSpec);
-                }
+        List<List<String>> chunksOfInValues = Lists.partition(inPossibleValues, MAX_IN_CLAUSE_SIZE);
+        Specification<X> containerSpec = null;
+        for (List<String> chunk : chunksOfInValues) {
+            Specification<X> multiOrEqualSpec = Specification.anyOf(in(column, chunk));
+            if (containerSpec == null) {
+                containerSpec = multiOrEqualSpec;
+            } else {
+                containerSpec = containerSpec.or(multiOrEqualSpec);
             }
-            return containerSpec;
         }
-        return anyOf(inPossibleValues
-                        .stream()
-                        .map(value -> SpecificationUtils.<X>equals(column, value))
-                        .toList()
-        );
+        return containerSpec;
     }
 
     @NotNull
@@ -343,9 +261,5 @@ public final class SpecificationUtils {
         } else {
             return root.get(dotSeparatedFields);
         }
-    }
-
-    private static void doLogWarn(ResourceFilterDTO resourceFilter) {
-        log.warn(WARN_UNEXPECTED_TYPE_ENCOUNTERED_FOR, resourceFilter.column(), resourceFilter.type(), resourceFilter.dataType());
     }
 }
