@@ -143,15 +143,7 @@ public final class SpecificationUtils {
         Specification<X> completedSpecification = specification;
 
         switch (resourceFilter.type()) {
-            case NOT_EQUAL, EQUALS -> {
-                if (resourceFilter.value() == null) {
-                    // if the value is null, we build an impossible specification (trick to remove later on ?)
-                    completedSpecification = completedSpecification.and(not(completedSpecification));
-                } else {
-                    completedSpecification = completedSpecification.and(equals(resourceFilter.column(), resourceFilter.value().toString()));
-                }
-            }
-            case IN -> {
+            case NOT_EQUAL, EQUALS, IN -> {
                 // this type can manage one value or a list of values (with OR)
                 if (resourceFilter.value() instanceof Collection<?> valueList) {
                     // implicitly an IN resourceFilter type because only IN may have value lists as filter value
@@ -164,6 +156,8 @@ public final class SpecificationUtils {
                 } else if (resourceFilter.value() == null) {
                     // if the value is null, we build an impossible specification (trick to remove later on ?)
                     completedSpecification = completedSpecification.and(not(completedSpecification));
+                } else {
+                    completedSpecification = completedSpecification.and(equals(resourceFilter.column(), resourceFilter.value().toString()));
                 }
             }
             case CONTAINS -> {
