@@ -79,6 +79,8 @@ class CommonSpecificationBuilderTest {
         // test data
         List<ResourceFilterDTO> resourceFilters = List.of(
                 new ResourceFilterDTO(TEXT, EQUALS, "dummyColumnValue", "dummyColumn"),
+                new ResourceFilterDTO(TEXT, NOT_EQUAL, "dummyColumnValue", "dummyColumn"),
+                new ResourceFilterDTO(TEXT, NOT_EQUAL, List.of("dummyColumnValue", "otherDummyColumnValue"), "dummyColumn"),
                 new ResourceFilterDTO(TEXT, STARTS_WITH, "dum", "dummyColumn"),
                 new ResourceFilterDTO(TEXT, IN, List.of("dummyColumnValue", "otherDummyColumnValue"), "dummyColumn"),
                 new ResourceFilterDTO(TEXT, IN, tooManyInValues, "dummyColumn"),

@@ -56,13 +56,13 @@ public final class SpecificationUtils {
         );
     }
 
+    public static <X> Specification<X> notEqual(String field, String value) {
+        return (root, cq, cb) -> cb.notEqual(getColumnPath(root, field), value);
+    }
+
     public static <X> Specification<X> in(String field, List<String> values) {
         return (root, cq, cb) ->
                 cb.upper(getColumnPath(root, field).as(String.class)).in(values);
-    }
-
-    public static <X> Specification<X> notEqual(String field, String value) {
-        return (root, cq, cb) -> cb.notEqual(getColumnPath(root, field), value);
     }
 
     public static <X> Specification<X> contains(String field, String value) {
@@ -151,13 +151,20 @@ public final class SpecificationUtils {
                             .map(Object::toString)
                             .map(String::toUpperCase)
                             .toList();
-                    completedSpecification = completedSpecification.and(generateInSpecification(resourceFilter.column(), inValues)
+                    completedSpecification = completedSpecification.and(
+                            resourceFilter.type() == ResourceFilterDTO.Type.NOT_EQUAL ?
+                            not(generateInSpecification(resourceFilter.column(), inValues)) :
+                            generateInSpecification(resourceFilter.column(), inValues)
                     );
                 } else if (resourceFilter.value() == null) {
                     // if the value is null, we build an impossible specification (trick to remove later on ?)
                     completedSpecification = completedSpecification.and(not(completedSpecification));
                 } else {
-                    completedSpecification = completedSpecification.and(equals(resourceFilter.column(), resourceFilter.value().toString()));
+                    completedSpecification = completedSpecification.and(
+                            resourceFilter.type() == ResourceFilterDTO.Type.NOT_EQUAL ?
+                            notEqual(resourceFilter.column(), resourceFilter.value().toString()) :
+                            equals(resourceFilter.column(), resourceFilter.value().toString())
+                    );
                 }
             }
             case CONTAINS -> {
