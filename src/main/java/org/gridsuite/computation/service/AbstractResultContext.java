@@ -67,6 +67,7 @@ public abstract class AbstractResultContext<C extends AbstractComputationRunCont
                 .setHeader(REPORT_UUID_HEADER, runContext.getReportInfos().reportUuid() != null ? runContext.getReportInfos().reportUuid().toString() : null)
                 .setHeader(REPORTER_ID_HEADER, runContext.getReportInfos().reporterId())
                 .setHeader(REPORT_TYPE_HEADER, runContext.getReportInfos().computationType())
+                .setHeader(HEADER_DEBUG, runContext.getDebug())
                 .copyHeaders(getSpecificMsgHeaders(objectMapper))
                 .build();
     }
