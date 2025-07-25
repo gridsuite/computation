@@ -43,7 +43,7 @@
 
     <properties>
         <powsybl-ws-dependencies.version>2.23.0</powsybl-ws-dependencies.version>
-        <powsybl-ws-commons.version>1.27.0-SNAPSHOT</powsybl-ws-commons.version>
+        <powsybl-ws-commons.version>1.29.0-SNAPSHOT</powsybl-ws-commons.version>
 
         <gridsuite-filter.version>1.6.0</gridsuite-filter.version>
 
