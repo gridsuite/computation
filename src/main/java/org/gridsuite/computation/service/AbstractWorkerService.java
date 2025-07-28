@@ -15,9 +15,9 @@ import com.powsybl.iidm.network.VariantManagerConstants;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
 import com.powsybl.ws.commons.ZipUtils;
-import org.gridsuite.computation.s3.S3Service;
 import org.apache.commons.lang3.StringUtils;
 import org.gridsuite.computation.ComputationException;
+import org.gridsuite.computation.s3.ComputationS3Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,15 +33,18 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
-import static com.powsybl.ws.commons.computation.service.NotificationService.HEADER_ERROR_MESSAGE;
-import static com.powsybl.ws.commons.s3.S3Service.S3_DELIMITER;
-import static com.powsybl.ws.commons.s3.S3Service.S3_SERVICE_NOT_AVAILABLE_MESSAGE;
+import static org.gridsuite.computation.s3.ComputationS3Service.S3_DELIMITER;
+import static org.gridsuite.computation.s3.ComputationS3Service.S3_SERVICE_NOT_AVAILABLE_MESSAGE;
+import static org.gridsuite.computation.service.NotificationService.HEADER_ERROR_MESSAGE;
 
 /**
  * @author Mathieu Deharbe <mathieu.deharbe at rte-france.com>
@@ -53,8 +56,8 @@ import static com.powsybl.ws.commons.s3.S3Service.S3_SERVICE_NOT_AVAILABLE_MESSA
 public abstract class AbstractWorkerService<R, C extends AbstractComputationRunContext<P>, P, S extends AbstractComputationResultService<?>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractWorkerService.class);
 
-    @Value("${debug-subpath:debug}")
-    private String s3DebugSubpath;
+    @Value("${powsybl-ws.s3.subpath.prefix:}${debug-subpath:debug}")
+    private String debugRootPath;
 
     protected final Lock lockRunAndCancel = new ReentrantLock();
     protected final ObjectMapper objectMapper;
@@ -67,7 +70,7 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
     protected final Map<UUID, CancelContext> cancelComputationRequests = new ConcurrentHashMap<>();
     protected final S resultService;
 
-    protected final S3Service s3Service;
+    protected final ComputationS3Service computationS3Service;
 
     protected AbstractWorkerService(NetworkStoreService networkStoreService,
                                     NotificationService notificationService,
@@ -83,7 +86,7 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
                                     NotificationService notificationService,
                                     ReportService reportService,
                                     S resultService,
-                                    S3Service s3Service,
+                                    ComputationS3Service computationS3Service,
                                     ExecutionService executionService,
                                     AbstractComputationObserver<R, P> observer,
                                     ObjectMapper objectMapper) {
@@ -91,7 +94,7 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
         this.notificationService = notificationService;
         this.reportService = reportService;
         this.resultService = resultService;
-        this.s3Service = s3Service;
+        this.computationS3Service = computationS3Service;
         this.executionService = executionService;
         this.observer = observer;
         this.objectMapper = objectMapper;
@@ -197,7 +200,7 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
 
         // run in debug mode, clean debug dir
         C runContext = resultContext.getRunContext();
-        if (Boolean.TRUE.equals(runContext.getDebug()) && s3Service != null) {
+        if (Boolean.TRUE.equals(runContext.getDebug()) && computationS3Service != null) {
             removeDirectory(runContext.getDebugDir());
         }
     }
@@ -207,7 +210,7 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
      * @param resultContext The context of the computation
      */
     protected void processDebug(AbstractResultContext<C> resultContext) {
-        if (s3Service == null) {
+        if (computationS3Service == null) {
             sendDebugMessage(resultContext, S3_SERVICE_NOT_AVAILABLE_MESSAGE);
             return;
         }
@@ -221,13 +224,13 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
         try {
             // zip the working directory
             ZipUtils.zip(debugDir, debugFilePath);
-            String s3Key = s3DebugSubpath + S3_DELIMITER + fileName;
+            String s3Key = debugRootPath + S3_DELIMITER + fileName;
 
             // insert debug file path into db
             resultService.saveDebugFileLocation(resultContext.getResultUuid(), s3Key);
 
             // upload  zip file to s3 storage
-            s3Service.uploadFile(debugFilePath, s3Key, fileName, 30);
+            computationS3Service.uploadFile(debugFilePath, s3Key, fileName, 30);
 
             // notify to study-server
             sendDebugMessage(resultContext, null);
@@ -287,7 +290,7 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
         LOGGER.info("Run {} computation...", getComputationType());
 
         // run in debug mode, create debug dir
-        if (Boolean.TRUE.equals(runContext.getDebug()) && s3Service != null) {
+        if (Boolean.TRUE.equals(runContext.getDebug()) && computationS3Service != null) {
             runContext.setDebugDir(createDebugDir());
         }
     }

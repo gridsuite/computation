@@ -28,12 +28,12 @@ class S3AutoConfigurationTest {
     void s3ServiceBeanShouldBeCreatedWhenS3Enabled() {
         contextRunner
                 .withPropertyValues(
-                        "spring.cloud.aws.s3.enabled=true",
+                        "computation.s3.enabled=true",
                         "spring.cloud.aws.bucket=test-bucket"
                 )
                 .run(context -> {
-                    assertThat(context).hasSingleBean(S3Service.class);
-                    S3Service service = context.getBean(S3Service.class);
+                    assertThat(context).hasSingleBean(ComputationS3Service.class);
+                    ComputationS3Service service = context.getBean(ComputationS3Service.class);
                     assertThat(service).isNotNull();
                 });
     }
@@ -41,11 +41,11 @@ class S3AutoConfigurationTest {
     @Test
     void s3ServiceBeanShouldNotBeCreatedWhenS3EnabledMissingOrFalse() {
         contextRunner
-                .run(context -> assertThat(context).doesNotHaveBean(S3Service.class));
+                .run(context -> assertThat(context).doesNotHaveBean(ComputationS3Service.class));
 
         contextRunner
-                .withPropertyValues("spring.cloud.aws.s3.enabled=false")
-                .run(context -> assertThat(context).doesNotHaveBean(S3Service.class));
+                .withPropertyValues("computation.s3.enabled=false")
+                .run(context -> assertThat(context).doesNotHaveBean(ComputationS3Service.class));
     }
 }
 

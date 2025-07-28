@@ -22,7 +22,7 @@ import java.util.Map;
 /**
  * @author Thang PHAM <quyet-thang.pham at rte-france.com>
  */
-public class S3Service {
+public class ComputationS3Service {
 
     public static final String S3_DELIMITER = "/";
     public static final String S3_SERVICE_NOT_AVAILABLE_MESSAGE = "S3 service not available";
@@ -33,7 +33,7 @@ public class S3Service {
 
     private final String bucketName;
 
-    public S3Service(S3Client s3Client, String bucketName) {
+    public ComputationS3Service(S3Client s3Client, String bucketName) {
         this.s3Client = s3Client;
         this.bucketName = bucketName;
     }

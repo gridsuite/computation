@@ -9,8 +9,8 @@ package org.gridsuite.computation.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.powsybl.commons.PowsyblException;
 import lombok.Getter;
+import org.gridsuite.computation.s3.ComputationS3Service;
 import org.gridsuite.computation.s3.S3InputStreamInfos;
-import org.gridsuite.computation.s3.S3Service;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import static org.gridsuite.computation.s3.S3Service.S3_SERVICE_NOT_AVAILABLE_MESSAGE;
+import static org.gridsuite.computation.s3.ComputationS3Service.S3_SERVICE_NOT_AVAILABLE_MESSAGE;
 
 /**
  * @author Mathieu Deharbe <mathieu.deharbe at rte-france.com>
@@ -39,7 +39,7 @@ public abstract class AbstractComputationService<C extends AbstractComputationRu
     protected NotificationService notificationService;
     protected UuidGeneratorService uuidGeneratorService;
     protected T resultService;
-    protected S3Service s3Service;
+    protected ComputationS3Service computationS3Service;
     @Getter
     private final String defaultProvider;
 
@@ -53,7 +53,7 @@ public abstract class AbstractComputationService<C extends AbstractComputationRu
 
     protected AbstractComputationService(NotificationService notificationService,
                                          T resultService,
-                                         S3Service s3Service,
+                                         ComputationS3Service computationS3Service,
                                          ObjectMapper objectMapper,
                                          UuidGeneratorService uuidGeneratorService,
                                          String defaultProvider) {
@@ -62,7 +62,7 @@ public abstract class AbstractComputationService<C extends AbstractComputationRu
         this.uuidGeneratorService = Objects.requireNonNull(uuidGeneratorService);
         this.defaultProvider = defaultProvider;
         this.resultService = Objects.requireNonNull(resultService);
-        this.s3Service = s3Service;
+        this.computationS3Service = computationS3Service;
     }
 
     public void stop(UUID resultUuid, String receiver) {
@@ -102,7 +102,7 @@ public abstract class AbstractComputationService<C extends AbstractComputationRu
     }
 
     public ResponseEntity<Resource> downloadDebugFile(UUID resultUuid) {
-        if (s3Service == null) {
+        if (computationS3Service == null) {
             throw new PowsyblException(S3_SERVICE_NOT_AVAILABLE_MESSAGE);
         }
 
@@ -112,7 +112,7 @@ public abstract class AbstractComputationService<C extends AbstractComputationRu
         }
 
         try {
-            S3InputStreamInfos s3InputStreamInfos = s3Service.downloadFile(s3Key);
+            S3InputStreamInfos s3InputStreamInfos = computationS3Service.downloadFile(s3Key);
             InputStream inputStream = s3InputStreamInfos.getInputStream();
             String fileName = s3InputStreamInfos.getFileName();
             Long fileLength = s3InputStreamInfos.getFileLength();

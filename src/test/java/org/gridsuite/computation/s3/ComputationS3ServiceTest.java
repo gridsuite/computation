@@ -31,19 +31,19 @@ import static org.mockito.Mockito.*;
 /**
  * @author Thang PHAM <quyet-thang.pham at rte-france.com>
  */
-class S3ServiceTest {
+class ComputationS3ServiceTest {
 
     public static final String PATH_IN_S3 = "path/in/s3";
     public static final String UPLOAD_FAILED_MESSAGE = "Upload failed";
     public static final String DOWNLOAD_FAILED_MESSAGE = "Download failed";
 
     private S3Client s3Client;
-    private S3Service s3Service;
+    private ComputationS3Service computationS3Service;
 
     @BeforeEach
     void setup() {
         s3Client = mock(S3Client.class);
-        s3Service = new S3Service(s3Client, "my-bucket");
+        computationS3Service = new ComputationS3Service(s3Client, "ws-bucket");
     }
 
     @Test
@@ -53,16 +53,16 @@ class S3ServiceTest {
         Files.writeString(tempFile, "Normal case");
 
         // perform test
-        s3Service.uploadFile(tempFile, PATH_IN_S3, "test.txt", 30);
+        computationS3Service.uploadFile(tempFile, PATH_IN_S3, "test.txt", 30);
 
         // check result
         ArgumentCaptor<PutObjectRequest> requestCaptor = ArgumentCaptor.forClass(PutObjectRequest.class);
         verify(s3Client).putObject(requestCaptor.capture(), any(RequestBody.class));
         PutObjectRequest actualRequest = requestCaptor.getValue();
 
-        assertThat(actualRequest.bucket()).isEqualTo("my-bucket");
+        assertThat(actualRequest.bucket()).isEqualTo("ws-bucket");
         assertThat(actualRequest.key()).isEqualTo(PATH_IN_S3);
-        assertThat(actualRequest.metadata()).containsEntry(S3Service.METADATA_FILE_NAME, "test.txt");
+        assertThat(actualRequest.metadata()).containsEntry(ComputationS3Service.METADATA_FILE_NAME, "test.txt");
         assertThat(actualRequest.tagging()).isEqualTo("expire-after-minutes=30");
     }
 
@@ -77,7 +77,7 @@ class S3ServiceTest {
                 .thenThrow(S3Exception.builder().message(UPLOAD_FAILED_MESSAGE).build());
 
         // perform test and check
-        assertThatThrownBy(() -> s3Service.uploadFile(tempFile, "key", "name.txt", null))
+        assertThatThrownBy(() -> computationS3Service.uploadFile(tempFile, "key", "name.txt", null))
                 .isInstanceOf(IOException.class)
                 .hasMessageContaining(UPLOAD_FAILED_MESSAGE);
     }
@@ -86,7 +86,7 @@ class S3ServiceTest {
     void downloadFileShouldReturnInfos() throws IOException {
         // setup
         GetObjectResponse response = GetObjectResponse.builder()
-                .metadata(Map.of(S3Service.METADATA_FILE_NAME, "download.txt"))
+                .metadata(Map.of(ComputationS3Service.METADATA_FILE_NAME, "download.txt"))
                 .contentLength(4086L)
                 .build();
 
@@ -98,7 +98,7 @@ class S3ServiceTest {
                 .thenReturn(mockedStream);
 
         // perform test
-        S3InputStreamInfos result = s3Service.downloadFile(PATH_IN_S3);
+        S3InputStreamInfos result = computationS3Service.downloadFile(PATH_IN_S3);
 
         // check result
         assertThat(result.getFileName()).isEqualTo("download.txt");
@@ -113,7 +113,7 @@ class S3ServiceTest {
                 .thenThrow(S3Exception.builder().message(DOWNLOAD_FAILED_MESSAGE).build());
 
         // perform test and check
-        assertThatThrownBy(() -> s3Service.downloadFile("bad-key"))
+        assertThatThrownBy(() -> computationS3Service.downloadFile("bad-key"))
                 .isInstanceOf(IOException.class)
                 .hasMessageContaining(DOWNLOAD_FAILED_MESSAGE);
     }

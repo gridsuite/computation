@@ -26,8 +26,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.WithAssertions;
 import org.gridsuite.computation.dto.ReportInfos;
+import org.gridsuite.computation.s3.ComputationS3Service;
 import org.gridsuite.computation.s3.S3InputStreamInfos;
-import org.gridsuite.computation.s3.S3Service;
 import org.gridsuite.computation.service.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,8 +60,8 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 
-import static org.gridsuite.computation.s3.S3Service.S3_DELIMITER;
-import static org.gridsuite.computation.s3.S3Service.S3_SERVICE_NOT_AVAILABLE_MESSAGE;
+import static org.gridsuite.computation.s3.ComputationS3Service.S3_DELIMITER;
+import static org.gridsuite.computation.s3.ComputationS3Service.S3_SERVICE_NOT_AVAILABLE_MESSAGE;
 import static org.gridsuite.computation.service.NotificationService.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -97,7 +97,7 @@ class ComputationTest implements WithAssertions {
     @Mock
     private Network network;
     @Mock
-    private S3Service s3Service;
+    private ComputationS3Service computationS3Service;
 
     private enum MockComputationStatus {
         NOT_DONE,
@@ -164,8 +164,8 @@ class ComputationTest implements WithAssertions {
     }
 
     private static class MockComputationService extends AbstractComputationService<MockComputationRunContext, MockComputationResultService, MockComputationStatus> {
-        protected MockComputationService(NotificationService notificationService, MockComputationResultService resultService, S3Service s3Service, ObjectMapper objectMapper, UuidGeneratorService uuidGeneratorService, String defaultProvider) {
-            super(notificationService, resultService, s3Service, objectMapper, uuidGeneratorService, defaultProvider);
+        protected MockComputationService(NotificationService notificationService, MockComputationResultService resultService, ComputationS3Service computationS3Service, ObjectMapper objectMapper, UuidGeneratorService uuidGeneratorService, String defaultProvider) {
+            super(notificationService, resultService, computationS3Service, objectMapper, uuidGeneratorService, defaultProvider);
         }
 
         @Override
@@ -187,8 +187,8 @@ class ComputationTest implements WithAssertions {
     }
 
     private static class MockComputationWorkerService extends AbstractWorkerService<Object, MockComputationRunContext, Object, MockComputationResultService> {
-        protected MockComputationWorkerService(NetworkStoreService networkStoreService, NotificationService notificationService, ReportService reportService, MockComputationResultService resultService, S3Service s3Service, ExecutionService executionService, AbstractComputationObserver<Object, Object> observer, ObjectMapper objectMapper) {
-            super(networkStoreService, notificationService, reportService, resultService, s3Service, executionService, observer, objectMapper);
+        protected MockComputationWorkerService(NetworkStoreService networkStoreService, NotificationService notificationService, ReportService reportService, MockComputationResultService resultService, ComputationS3Service computationS3Service, ExecutionService executionService, AbstractComputationObserver<Object, Object> observer, ObjectMapper objectMapper) {
+            super(networkStoreService, notificationService, reportService, resultService, computationS3Service, executionService, observer, objectMapper);
         }
 
         @Override
@@ -257,12 +257,12 @@ class ComputationTest implements WithAssertions {
                 notificationService,
                 reportService,
                 resultService,
-                s3Service,
+                computationS3Service,
                 executionService,
                 new MockComputationObserver(ObservationRegistry.create(), new SimpleMeterRegistry()),
                 objectMapper
         );
-        computationService = new MockComputationService(notificationService, resultService, s3Service, objectMapper, uuidGeneratorService, provider);
+        computationService = new MockComputationService(notificationService, resultService, computationS3Service, objectMapper, uuidGeneratorService, provider);
 
         MessageBuilder<String> builder = MessageBuilder
                 .withPayload("")
@@ -392,7 +392,7 @@ class ComputationTest implements WithAssertions {
 
             // Verify interactions
             verify(resultService).saveDebugFileLocation(eq(RESULT_UUID), anyString());
-            verify(s3Service).uploadFile(any(Path.class), anyString(), anyString(), eq(30));
+            verify(computationS3Service).uploadFile(any(Path.class), anyString(), anyString(), eq(30));
             verify(notificationService.getPublisher(), times(1 /* for result message */))
                     .send(eq("publishResult-out-0"), isA(Message.class));
             verify(notificationService.getPublisher(), times(1 /* for debug message */))
@@ -411,7 +411,7 @@ class ComputationTest implements WithAssertions {
         workerService.consumeRun().accept(message);
 
         // Verify interactions
-        verifyNoInteractions(s3Service, resultService);
+        verifyNoInteractions(computationS3Service, resultService);
         verify(notificationService.getPublisher(), times(1 /* only result */))
                 .send(eq("publishResult-out-0"), isA(Message.class));
         verify(notificationService.getPublisher(), times(0 /* no debug */))
@@ -420,7 +420,7 @@ class ComputationTest implements WithAssertions {
 
     @Test
     void testProcessDebugWithoutS3Service() {
-        // Setup worker service without S3Service
+        // Setup worker service without ComputationS3Service
         workerService = new MockComputationWorkerService(
                 networkStoreService,
                 notificationService,
@@ -441,7 +441,7 @@ class ComputationTest implements WithAssertions {
         // Verify
         verify(notificationService.getPublisher()).send(eq("publishDebug-out-0"), argThat((Message<String> msg) ->
                 msg.getHeaders().get(HEADER_ERROR_MESSAGE).equals(S3_SERVICE_NOT_AVAILABLE_MESSAGE)));
-        verifyNoInteractions(s3Service, resultService);
+        verifyNoInteractions(computationS3Service, resultService);
     }
 
     @Test
@@ -459,7 +459,7 @@ class ComputationTest implements WithAssertions {
             workerService.consumeRun().accept(message);
 
             // Verify interactions
-            verify(s3Service, never()).uploadFile(any(), any(), any(), anyInt());
+            verify(computationS3Service, never()).uploadFile(any(), any(), any(), anyInt());
             verify(resultService, never()).saveDebugFileLocation(any(), any());
             verify(notificationService.getPublisher()).send(eq("publishDebug-out-0"), argThat((Message<String> msg) ->
                     msg.getHeaders().get(HEADER_ERROR_MESSAGE).equals("Zip error")));
@@ -478,7 +478,7 @@ class ComputationTest implements WithAssertions {
                 .fileLength(fileLength)
                 .build();
         when(resultService.findDebugFileLocation(RESULT_UUID)).thenReturn(S3_KEY);
-        when(s3Service.downloadFile(S3_KEY)).thenReturn(s3InputStreamInfos);
+        when(computationS3Service.downloadFile(S3_KEY)).thenReturn(s3InputStreamInfos);
 
         // Execute
         ResponseEntity<?> response = computationService.downloadDebugFile(RESULT_UUID);
@@ -489,7 +489,7 @@ class ComputationTest implements WithAssertions {
         assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_OCTET_STREAM);
         assertThat(response.getHeaders().getContentLength()).isEqualTo(fileLength);
         assertThat(response.getHeaders().get(HttpHeaders.CONTENT_DISPOSITION)).contains("attachment; filename=\"" + fileName + "\"");
-        verify(s3Service).downloadFile(S3_KEY);
+        verify(computationS3Service).downloadFile(S3_KEY);
     }
 
     @Test
@@ -499,7 +499,7 @@ class ComputationTest implements WithAssertions {
 
         // Execute & Check
         assertThrows(PowsyblException.class, () -> computationService.downloadDebugFile(RESULT_UUID), "S3 service not available");
-        verify(s3Service, never()).downloadFile(any());
+        verify(computationS3Service, never()).downloadFile(any());
     }
 
     @Test
@@ -512,21 +512,21 @@ class ComputationTest implements WithAssertions {
 
         // Check
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        verify(s3Service, never()).downloadFile(any());
+        verify(computationS3Service, never()).downloadFile(any());
     }
 
     @Test
     void testDownloadDebugFileIOException() throws IOException {
         // Setup
         when(resultService.findDebugFileLocation(RESULT_UUID)).thenReturn(S3_KEY);
-        when(s3Service.downloadFile(S3_KEY)).thenThrow(new IOException("S3 error"));
+        when(computationS3Service.downloadFile(S3_KEY)).thenThrow(new IOException("S3 error"));
 
         // Act
         ResponseEntity<?> response = computationService.downloadDebugFile(RESULT_UUID);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        verify(s3Service).downloadFile(S3_KEY);
+        verify(computationS3Service).downloadFile(S3_KEY);
     }
 
 }
