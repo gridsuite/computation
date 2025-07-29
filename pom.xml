@@ -51,7 +51,6 @@
         <org.hamcrest.version>2.2</org.hamcrest.version>
 
         <spring-cloud-aws.version>3.2.0</spring-cloud-aws.version>
-        <aws-sdk.version>2.21.20</aws-sdk.version>
 
         <sonar.organization>gridsuite</sonar.organization>
         <sonar.projectKey>org.gridsuite:computation</sonar.projectKey>
@@ -84,21 +83,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <dependency>
-                <groupId>software.amazon.awssdk</groupId>
-                <artifactId>bom</artifactId>
-                <version>${aws-sdk.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.awspring.cloud</groupId>
-                <artifactId>spring-cloud-aws-dependencies</artifactId>
-                <version>${spring-cloud-aws.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -150,9 +134,9 @@
             <artifactId>spring-cloud-stream</artifactId>
         </dependency>
         <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>s3</artifactId>
-            <optional>true</optional>
+            <groupId>io.awspring.cloud</groupId>
+            <artifactId>spring-cloud-aws-starter-s3</artifactId>
+            <version>${spring-cloud-aws.version}</version>
         </dependency>
 
         <!-- AspectJ -->
