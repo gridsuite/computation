@@ -46,6 +46,8 @@ public class NotificationService {
     public static final String HEADER_PROVIDER = "provider";
     public static final String HEADER_MESSAGE = "message";
     public static final String HEADER_USER_ID = "userId";
+    public static final String HEADER_DEBUG = "debug";
+    public static final String HEADER_ERROR_MESSAGE = "errorMessage";
 
     public static final String SENDING_MESSAGE = "Sending message : {}";
 
@@ -65,6 +67,19 @@ public class NotificationService {
     public void sendCancelMessage(Message<String> message) {
         CANCEL_MESSAGE_LOGGER.debug(SENDING_MESSAGE, message);
         publisher.send(publishPrefix + "Cancel-out-0", message);
+    }
+
+    @PostCompletion
+    public void sendDebugMessage(UUID resultUuid, String receiver, String userId, @Nullable Map<String, Object> additionalHeaders) {
+        MessageBuilder<String> builder = MessageBuilder
+                .withPayload("")
+                .setHeader(HEADER_RESULT_UUID, resultUuid.toString())
+                .setHeader(HEADER_RECEIVER, receiver)
+                .setHeader(HEADER_USER_ID, userId)
+                .copyHeaders(additionalHeaders);
+        Message<String> message = builder.build();
+        RESULT_MESSAGE_LOGGER.debug(SENDING_MESSAGE, message);
+        publisher.send(publishPrefix + "Debug-out-0", message);
     }
 
     @PostCompletion
