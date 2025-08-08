@@ -230,7 +230,7 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
             resultService.saveDebugFileLocation(resultContext.getResultUuid(), s3Key);
 
             // upload  zip file to s3 storage
-            computationS3Service.uploadFile(debugFilePath, s3Key, fileName, 30);
+            computationS3Service.uploadFile(debugFilePath, s3Key, fileName);
 
             // notify to study-server
             sendDebugMessage(resultContext, null);

@@ -392,7 +392,7 @@ class ComputationTest implements WithAssertions {
 
             // Verify interactions
             verify(resultService).saveDebugFileLocation(eq(RESULT_UUID), anyString());
-            verify(computationS3Service).uploadFile(any(Path.class), anyString(), anyString(), eq(30));
+            verify(computationS3Service).uploadFile(any(Path.class), anyString(), anyString());
             verify(notificationService.getPublisher(), times(1 /* for result message */))
                     .send(eq("publishResult-out-0"), isA(Message.class));
             verify(notificationService.getPublisher(), times(1 /* for debug message */))
@@ -459,7 +459,7 @@ class ComputationTest implements WithAssertions {
             workerService.consumeRun().accept(message);
 
             // Verify interactions
-            verify(computationS3Service, never()).uploadFile(any(), any(), any(), anyInt());
+            verify(computationS3Service, never()).uploadFile(any(), any(), any());
             verify(resultService, never()).saveDebugFileLocation(any(), any());
             verify(notificationService.getPublisher()).send(eq("publishDebug-out-0"), argThat((Message<String> msg) ->
                     msg.getHeaders().get(HEADER_ERROR_MESSAGE).equals("Zip error")));
