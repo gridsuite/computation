@@ -53,7 +53,7 @@ class ComputationS3ServiceTest {
         Files.writeString(tempFile, "Normal case");
 
         // perform test
-        computationS3Service.uploadFile(tempFile, PATH_IN_S3, "test.txt", 30);
+        computationS3Service.uploadFile(tempFile, PATH_IN_S3, "test.txt");
 
         // check result
         ArgumentCaptor<PutObjectRequest> requestCaptor = ArgumentCaptor.forClass(PutObjectRequest.class);
@@ -63,7 +63,6 @@ class ComputationS3ServiceTest {
         assertThat(actualRequest.bucket()).isEqualTo("ws-bucket");
         assertThat(actualRequest.key()).isEqualTo(PATH_IN_S3);
         assertThat(actualRequest.metadata()).containsEntry(ComputationS3Service.METADATA_FILE_NAME, "test.txt");
-        assertThat(actualRequest.tagging()).isEqualTo("expire-after-minutes=30");
     }
 
     @Test
@@ -77,7 +76,7 @@ class ComputationS3ServiceTest {
                 .thenThrow(S3Exception.builder().message(UPLOAD_FAILED_MESSAGE).build());
 
         // perform test and check
-        assertThatThrownBy(() -> computationS3Service.uploadFile(tempFile, "key", "name.txt", null))
+        assertThatThrownBy(() -> computationS3Service.uploadFile(tempFile, "key", "name.txt"))
                 .isInstanceOf(IOException.class)
                 .hasMessageContaining(UPLOAD_FAILED_MESSAGE);
     }

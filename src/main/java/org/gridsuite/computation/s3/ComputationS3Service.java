@@ -38,13 +38,12 @@ public class ComputationS3Service {
         this.bucketName = bucketName;
     }
 
-    public void uploadFile(Path filePath, String s3Key, String fileName, Integer expireAfterMinutes) throws IOException {
+    public void uploadFile(Path filePath, String s3Key, String fileName) throws IOException {
         try {
             PutObjectRequest putRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
                     .key(s3Key)
                     .metadata(Map.of(METADATA_FILE_NAME, fileName))
-                    .tagging(expireAfterMinutes != null ? "expire-after-minutes=" + expireAfterMinutes : null)
                     .build();
             s3Client.putObject(putRequest, RequestBody.fromFile(filePath));
         } catch (SdkException e) {
