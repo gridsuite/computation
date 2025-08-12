@@ -4,13 +4,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-
-/**
- * Copyright (c) 2025, RTE (http://www.rte-france.com)
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
 package org.gridsuite.computation.utils;
 
 import com.google.common.collect.Lists;
@@ -236,6 +229,8 @@ public final class SpecificationUtils {
                     specification.and(lessThanOrEqual(resourceFilter.column(), valueDouble, tolerance));
             case GREATER_THAN_OR_EQUAL ->
                     specification.and(greaterThanOrEqual(resourceFilter.column(), valueDouble, tolerance));
+            case EQUALS -> specification.and(greaterThanOrEqual(resourceFilter.column(), valueDouble, tolerance))
+                    .and(lessThanOrEqual(resourceFilter.column(), valueDouble, tolerance));
             default ->
                     throw new IllegalArgumentException("The filter type " + resourceFilter.type() + " is not supported with the data type " + resourceFilter.dataType());
         };
