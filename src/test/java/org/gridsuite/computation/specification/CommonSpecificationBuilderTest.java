@@ -88,7 +88,8 @@ class CommonSpecificationBuilderTest {
                 new ResourceFilterDTO(TEXT, CONTAINS, List.of("partialValue1", "partialValue2"), "dummyColumn"),
                 new ResourceFilterDTO(NUMBER, LESS_THAN_OR_EQUAL, 100.0157, "dummyNumberColumn"),
                 new ResourceFilterDTO(NUMBER, GREATER_THAN_OR_EQUAL, 10, "dummyNumberColumn", 0.1),
-                new ResourceFilterDTO(NUMBER, NOT_EQUAL, 10, "parent.dummyNumberColumn")
+                new ResourceFilterDTO(NUMBER, NOT_EQUAL, 10, "parent.dummyNumberColumn"),
+                new ResourceFilterDTO(NUMBER, EQUALS, 42.000, "dummyNumberColumn")
         );
         List<ResourceFilterDTO> resourceFiltersWithChildren = List.of(
                 new ResourceFilterDTO(NUMBER, NOT_EQUAL, 10, "parent.dummyNumberColumn")
