@@ -15,7 +15,6 @@ package org.gridsuite.computation.utils;
 
 import com.google.common.collect.Lists;
 import jakarta.persistence.criteria.*;
-import lombok.extern.slf4j.Slf4j;
 import org.gridsuite.computation.dto.ResourceFilterDTO;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
@@ -33,7 +32,6 @@ import static org.springframework.data.jpa.domain.Specification.not;
  *
  * @author Kevin Le Saulnier <kevin.lesaulnier@rte-france.com>
  */
-@Slf4j
 public final class SpecificationUtils {
 
     public static final String FIELD_SEPARATOR = ".";
