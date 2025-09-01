@@ -4,13 +4,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-
-/**
- * Copyright (c) 2025, RTE (http://www.rte-france.com)
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
 package org.gridsuite.computation.utils;
 
 import com.google.common.collect.Lists;
@@ -33,13 +26,13 @@ import static org.springframework.data.jpa.domain.Specification.not;
  * @author Kevin Le Saulnier <kevin.lesaulnier@rte-france.com>
  */
 public final class SpecificationUtils {
-  /**
-   * Maximum values per IN clause chunk to avoid StackOverflow exceptions.
-   * Current value (500) is a safe default but can be changed
-   */
-    public static final int MAX_IN_CLAUSE_SIZE = 500;
 
     public static final String FIELD_SEPARATOR = ".";
+
+    /**
+    Prefer less than 1000 for Oracle DB / good compromise for Postgres
+     */
+    public static final int MAX_IN_CLAUSE_SIZE = 10000;
 
     // Utility class, so no constructor
     private SpecificationUtils() { }
@@ -56,6 +49,11 @@ public final class SpecificationUtils {
 
     public static <X> Specification<X> notEqual(String field, String value) {
         return (root, cq, cb) -> cb.notEqual(getColumnPath(root, field), value);
+    }
+
+    public static <X> Specification<X> in(String field, List<String> values) {
+        return (root, cq, cb) ->
+                cb.upper(getColumnPath(root, field).as(String.class)).in(values);
     }
 
     public static <X> Specification<X> contains(String field, String value) {
@@ -142,15 +140,22 @@ public final class SpecificationUtils {
                     // implicitly an IN resourceFilter type because only IN may have value lists as filter value
                     List<String> inValues = valueList.stream()
                             .map(Object::toString)
+                            .map(String::toUpperCase)
                             .toList();
                     completedSpecification = completedSpecification.and(
+                            resourceFilter.type() == ResourceFilterDTO.Type.NOT_EQUAL ?
+                            not(generateInSpecification(resourceFilter.column(), inValues)) :
                             generateInSpecification(resourceFilter.column(), inValues)
                     );
                 } else if (resourceFilter.value() == null) {
                     // if the value is null, we build an impossible specification (trick to remove later on ?)
                     completedSpecification = completedSpecification.and(not(completedSpecification));
                 } else {
-                    completedSpecification = completedSpecification.and(equals(resourceFilter.column(), resourceFilter.value().toString()));
+                    completedSpecification = completedSpecification.and(
+                            resourceFilter.type() == ResourceFilterDTO.Type.NOT_EQUAL ?
+                            notEqual(resourceFilter.column(), resourceFilter.value().toString()) :
+                            equals(resourceFilter.column(), resourceFilter.value().toString())
+                    );
                 }
             }
             case CONTAINS -> {
@@ -183,32 +188,17 @@ public final class SpecificationUtils {
     * @return a specification for the IN clause
     */
     private static <X> Specification<X> generateInSpecification(String column, List<String> inPossibleValues) {
-
-        if (inPossibleValues.size() > MAX_IN_CLAUSE_SIZE) {
-            // there are too many values for only one call to anyOf() : it might cause a StackOverflow
-            // => the specification is divided into several specifications which have an OR between them :
-            List<List<String>> chunksOfInValues = Lists.partition(inPossibleValues, MAX_IN_CLAUSE_SIZE);
-            Specification<X> containerSpec = null;
-            for (List<String> chunk : chunksOfInValues) {
-                Specification<X> multiOrEqualSpec = anyOf(
-                        chunk
-                                .stream()
-                                .map(value -> SpecificationUtils.<X>equals(column, value))
-                                .toList()
-                );
-                if (containerSpec == null) {
-                    containerSpec = multiOrEqualSpec;
-                } else {
-                    containerSpec = containerSpec.or(multiOrEqualSpec);
-                }
+        List<List<String>> chunksOfInValues = Lists.partition(inPossibleValues, MAX_IN_CLAUSE_SIZE);
+        Specification<X> containerSpec = null;
+        for (List<String> chunk : chunksOfInValues) {
+            Specification<X> multiOrEqualSpec = Specification.anyOf(in(column, chunk));
+            if (containerSpec == null) {
+                containerSpec = multiOrEqualSpec;
+            } else {
+                containerSpec = containerSpec.or(multiOrEqualSpec);
             }
-            return containerSpec;
         }
-        return anyOf(inPossibleValues
-                        .stream()
-                        .map(value -> SpecificationUtils.<X>equals(column, value))
-                        .toList()
-        );
+        return containerSpec;
     }
 
     @NotNull
@@ -236,6 +226,8 @@ public final class SpecificationUtils {
                     specification.and(lessThanOrEqual(resourceFilter.column(), valueDouble, tolerance));
             case GREATER_THAN_OR_EQUAL ->
                     specification.and(greaterThanOrEqual(resourceFilter.column(), valueDouble, tolerance));
+            case EQUALS -> specification.and(greaterThanOrEqual(resourceFilter.column(), valueDouble, tolerance))
+                    .and(lessThanOrEqual(resourceFilter.column(), valueDouble, tolerance));
             default ->
                     throw new IllegalArgumentException("The filter type " + resourceFilter.type() + " is not supported with the data type " + resourceFilter.dataType());
         };
