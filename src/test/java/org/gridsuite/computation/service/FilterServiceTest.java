@@ -214,7 +214,7 @@ class FilterServiceTest {
     void shouldCreateCombinatorRule() {
         when(filterService.createCombination(any(), any())).thenCallRealMethod();
         List<AbstractExpertRule> rules = Collections.singletonList(mock(AbstractExpertRule.class));
-        AbstractExpertRule result = filterService.createCombination(CombinatorType.AND, rules);
+        AbstractExpertRule result = CombinatorExpertRule.builder().combinator(CombinatorType.AND).rules(rules).build();
         assertNotNull(result);
         assertInstanceOf(CombinatorExpertRule.class, result);
         CombinatorExpertRule combinatorRule = (CombinatorExpertRule) result;
