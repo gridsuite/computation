@@ -273,13 +273,18 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
     }
 
     private void sendDebugMessage(AbstractResultContext<C> resultContext, @Nullable String messageError) {
-        Map<String, Object> resultHeaders = new HashMap<>();
-
-        // --- attach debug to result headers --- //
-        resultHeaders.put(HEADER_ERROR_MESSAGE, messageError);
+        Map<String, Object> debugHeaders = getDebugHeaders(resultContext, messageError);
 
         notificationService.sendDebugMessage(resultContext.getResultUuid(), resultContext.getRunContext().getReceiver(),
-                resultContext.getRunContext().getUserId(), resultHeaders);
+                resultContext.getRunContext().getUserId(), debugHeaders);
+    }
+
+    protected Map<String, Object> getDebugHeaders(AbstractResultContext<C> resultContext, String messageError) {
+        Map<String, Object> headers = new HashMap<>();
+
+        // --- attach an error message to result headers --- //
+        headers.put(HEADER_ERROR_MESSAGE, messageError);
+        return headers;
     }
 
     /**
