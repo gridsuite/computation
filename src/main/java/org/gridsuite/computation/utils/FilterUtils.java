@@ -20,9 +20,9 @@ import java.util.List;
  * @author maissa Souissi <maissa.souissi at rte-france.com>
  */
 public final class FilterUtils {
-
     // Utility class, so no constructor
     private FilterUtils() {
+        throw new IllegalCallerException("Utility class");
     }
 
     private static <T> T fromStringToDTO(String jsonString, ObjectMapper objectMapper, TypeReference<T> typeReference, T defaultValue) {
@@ -37,13 +37,11 @@ public final class FilterUtils {
     }
 
     public static List<ResourceFilterDTO> fromStringFiltersToDTO(String stringFilters, ObjectMapper objectMapper) {
-        return fromStringToDTO(stringFilters, objectMapper, new TypeReference<>() {
-        }, List.of());
+        return fromStringToDTO(stringFilters, objectMapper, new TypeReference<>() { }, List.of());
     }
 
     public static GlobalFilter fromStringGlobalFiltersToDTO(String stringGlobalFilters, ObjectMapper objectMapper) {
-        return fromStringToDTO(stringGlobalFilters, objectMapper, new TypeReference<>() {
-        }, null);
+        return fromStringToDTO(stringGlobalFilters, objectMapper, new TypeReference<>() { }, null);
     }
 }
 
