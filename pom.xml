@@ -45,7 +45,7 @@
         <powsybl-ws-dependencies.version>2.23.0</powsybl-ws-dependencies.version>
         <powsybl-ws-commons.version>1.28.1</powsybl-ws-commons.version>
 
-        <gridsuite-filter.version>1.8.0-SNAPSHOT</gridsuite-filter.version>
+        <gridsuite-filter.version>1.10.0-SNAPSHOT</gridsuite-filter.version>
 
         <org-apache-commons.version>4.4</org-apache-commons.version>
         <org.hamcrest.version>2.2</org.hamcrest.version>

@@ -94,7 +94,7 @@ public abstract class AbstractFilterService extends AbstractGlobalFilterService 
                                                          @NonNull final GlobalFilter globalFilter,
                                                          @NonNull final List<EquipmentType> equipmentTypes,
                                                          final String columnName) {
-        final List<String> subjectIds = this.getIdsFilter(networkUuid, variantId, globalFilter, equipmentTypes);
+        final List<String> subjectIds = this.getFilteredIds(networkUuid, variantId, globalFilter, equipmentTypes);
         return subjectIds.isEmpty()
                 ? Optional.empty()
                 : Optional.of(new ResourceFilterDTO(ResourceFilterDTO.DataType.TEXT, ResourceFilterDTO.Type.IN, subjectIds, columnName));
