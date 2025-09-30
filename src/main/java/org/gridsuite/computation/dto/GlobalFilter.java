@@ -6,34 +6,22 @@
  */
 package org.gridsuite.computation.dto;
 
-import com.powsybl.iidm.network.Country;
 import com.powsybl.security.LimitViolationType;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.FieldNameConstants;
+import lombok.experimental.SuperBuilder;
 
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * @author maissa Souissi <maissa.souissi at rte-france.com>
  */
 @Getter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@FieldNameConstants
-public class GlobalFilter {
-    List<String> nominalV;
-
-    List<Country> countryCode;
-
-    List<UUID> genericFilter;
-
-    List<LimitViolationType> limitViolationsTypes;
-
-    Map<String, List<String>> substationProperty;
+public class GlobalFilter extends org.gridsuite.filter.globalfilter.GlobalFilter {
+    // TODO move it to filterparameters in loadflow-server or manage it in server endpoint
+    private List<LimitViolationType> limitViolationsTypes;
 }
