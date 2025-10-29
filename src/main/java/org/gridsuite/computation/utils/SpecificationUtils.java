@@ -8,8 +8,8 @@ package org.gridsuite.computation.utils;
 
 import com.google.common.collect.Lists;
 import jakarta.persistence.criteria.*;
+import lombok.NonNull;
 import org.gridsuite.computation.dto.ResourceFilterDTO;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.query.EscapeCharacter;
 
@@ -129,7 +129,7 @@ public final class SpecificationUtils {
         return completedSpecification;
     }
 
-    @NotNull
+    @NonNull
     private static <X> Specification<X> appendTextFilterToSpecification(Specification<X> specification, ResourceFilterDTO resourceFilter) {
         Specification<X> completedSpecification = specification;
 
@@ -201,7 +201,7 @@ public final class SpecificationUtils {
         return containerSpec;
     }
 
-    @NotNull
+    @NonNull
     private static <X> Specification<X> appendNumberFilterToSpecification(Specification<X> specification, ResourceFilterDTO resourceFilter) {
         String filterValue = resourceFilter.value().toString();
         double tolerance;
