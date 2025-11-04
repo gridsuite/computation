@@ -17,7 +17,6 @@ import org.gridsuite.computation.dto.ResourceFilterDTO;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.globalfilter.AbstractGlobalFilterService;
 import org.gridsuite.filter.utils.EquipmentType;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -42,7 +41,6 @@ public abstract class AbstractFilterService extends AbstractGlobalFilterService 
     protected final RestTemplate restTemplate = new RestTemplate();
     protected final NetworkStoreService networkStoreService;
     protected final String filterServerBaseUri;
-    public static final String NETWORK_UUID = "networkUuid";
 
     public static final String IDS = "ids";
 
@@ -80,7 +78,7 @@ public abstract class AbstractFilterService extends AbstractGlobalFilterService 
     }
 
     @Override
-    protected Network getNetwork(@NotNull final UUID networkUuid, @NotNull final String variantId) {
+    protected Network getNetwork(@NonNull final UUID networkUuid, @NonNull final String variantId) {
         try {
             Network network = networkStoreService.getNetwork(networkUuid, PreloadingStrategy.COLLECTION);
             network.getVariantManager().setWorkingVariant(variantId);
