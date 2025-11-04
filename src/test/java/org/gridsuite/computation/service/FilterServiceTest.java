@@ -12,12 +12,16 @@ import com.powsybl.iidm.network.Network;
 import com.powsybl.iidm.network.VariantManager;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
+import org.gridsuite.computation.dto.GlobalFilter;
+import org.gridsuite.computation.dto.ResourceFilterDTO;
 import org.gridsuite.filter.AbstractFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -121,5 +126,14 @@ class FilterServiceTest {
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> filterService.getNetwork(NETWORK_UUID, VARIANT_ID));
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         assertEquals("Network not found", exception.getReason());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void shouldReturnResourceFilterWhenSuccessful() {
+        when(filterService.getResourceFilter(any(), any(), any(), any(), any())).thenCallRealMethod();
+        when(networkStoreService.getNetwork(any(), any())).thenReturn(network);
+        Optional<ResourceFilterDTO> resourceFilter = filterService.getResourceFilter(NETWORK_UUID, VARIANT_ID, new GlobalFilter(), List.of(), "testColumn");
+        assertFalse(resourceFilter.isPresent());
     }
 }

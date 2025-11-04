@@ -21,7 +21,7 @@ import java.util.List;
  */
 public final class FilterUtils {
     // Utility class, so no constructor
-    private FilterUtils() {
+    FilterUtils() {
         throw new IllegalCallerException("Utility class");
     }
 
