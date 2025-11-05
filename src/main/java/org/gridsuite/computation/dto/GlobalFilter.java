@@ -8,9 +8,9 @@ package org.gridsuite.computation.dto;
 
 import com.powsybl.security.LimitViolationType;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
@@ -18,12 +18,11 @@ import java.util.List;
 /**
  * @author maissa Souissi <maissa.souissi at rte-france.com>
  */
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 public class GlobalFilter extends org.gridsuite.filter.globalfilter.GlobalFilter {
-    // TODO move it to filterparameters in loadflow-server or manage it in server endpoint
     private List<LimitViolationType> limitViolationsTypes;
 }
