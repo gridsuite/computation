@@ -376,14 +376,14 @@ public abstract class AbstractFilterService implements FilterLoader {
     protected List<FieldType> getNominalVoltageFieldType(EquipmentType equipmentType) {
         return switch (equipmentType) {
             case LINE, TWO_WINDINGS_TRANSFORMER -> List.of(FieldType.NOMINAL_VOLTAGE_1, FieldType.NOMINAL_VOLTAGE_2);
-            case VOLTAGE_LEVEL -> List.of(FieldType.NOMINAL_VOLTAGE);
+            case VOLTAGE_LEVEL, GENERATOR -> List.of(FieldType.NOMINAL_VOLTAGE);
             default -> List.of();
         };
     }
 
     protected List<FieldType> getCountryCodeFieldType(EquipmentType equipmentType) {
         return switch (equipmentType) {
-            case VOLTAGE_LEVEL, TWO_WINDINGS_TRANSFORMER -> List.of(FieldType.COUNTRY);
+            case VOLTAGE_LEVEL, TWO_WINDINGS_TRANSFORMER, GENERATOR -> List.of(FieldType.COUNTRY);
             case LINE -> List.of(FieldType.COUNTRY_1, FieldType.COUNTRY_2);
             default -> List.of();
         };
@@ -391,8 +391,8 @@ public abstract class AbstractFilterService implements FilterLoader {
 
     protected List<FieldType> getSubstationPropertiesFieldTypes(EquipmentType equipmentType) {
         return equipmentType == EquipmentType.LINE ?
-                List.of(FieldType.SUBSTATION_PROPERTIES_1, FieldType.SUBSTATION_PROPERTIES_2) :
-                List.of(FieldType.SUBSTATION_PROPERTIES);
+            List.of(FieldType.SUBSTATION_PROPERTIES_1, FieldType.SUBSTATION_PROPERTIES_2) :
+            List.of(FieldType.SUBSTATION_PROPERTIES);
     }
 }
 
