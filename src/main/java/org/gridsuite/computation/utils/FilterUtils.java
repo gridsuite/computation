@@ -19,6 +19,7 @@ import java.util.List;
 /**
  * @author maissa Souissi <maissa.souissi at rte-france.com>
  */
+@SuppressWarnings("checkstyle:HideUtilityClassConstructor")
 public final class FilterUtils {
     // Utility class, so no constructor
     FilterUtils() {
