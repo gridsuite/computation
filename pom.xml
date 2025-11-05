@@ -42,7 +42,7 @@
     </developers>
 
     <properties>
-        <powsybl-ws-dependencies.version>2.25.0</powsybl-ws-dependencies.version>
+        <powsybl-ws-dependencies.version>2.27.0-SNAPSHOT</powsybl-ws-dependencies.version>
         <powsybl-ws-commons.version>1.28.1</powsybl-ws-commons.version>
 
         <gridsuite-filter.version>1.6.0</gridsuite-filter.version>
@@ -50,7 +50,7 @@
         <org-apache-commons.version>4.4</org-apache-commons.version>
         <org.hamcrest.version>2.2</org.hamcrest.version>
 
-        <spring-cloud-aws.version>3.3.0</spring-cloud-aws.version>
+        <spring-cloud-aws.version>3.4.0</spring-cloud-aws.version>
 
         <sonar.organization>gridsuite</sonar.organization>
         <sonar.projectKey>org.gridsuite:computation</sonar.projectKey>
