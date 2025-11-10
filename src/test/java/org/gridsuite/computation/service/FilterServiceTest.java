@@ -345,14 +345,16 @@ class FilterServiceTest {
                 // Nominal voltage
                 Arguments.of(GlobalFilter.Fields.nominalV, EquipmentType.LINE, List.of(FieldType.NOMINAL_VOLTAGE_1, FieldType.NOMINAL_VOLTAGE_2)),
                 Arguments.of(GlobalFilter.Fields.nominalV, EquipmentType.TWO_WINDINGS_TRANSFORMER, List.of(FieldType.NOMINAL_VOLTAGE_1, FieldType.NOMINAL_VOLTAGE_2)),
+                Arguments.of(GlobalFilter.Fields.nominalV, EquipmentType.GENERATOR, List.of(FieldType.NOMINAL_VOLTAGE)),
                 Arguments.of(GlobalFilter.Fields.nominalV, EquipmentType.VOLTAGE_LEVEL, List.of(FieldType.NOMINAL_VOLTAGE)),
-                Arguments.of(GlobalFilter.Fields.nominalV, EquipmentType.GENERATOR, Collections.emptyList()),
+                Arguments.of(GlobalFilter.Fields.nominalV, EquipmentType.BATTERY, Collections.emptyList()),
 
                 // Country code
+                Arguments.of(GlobalFilter.Fields.countryCode, EquipmentType.GENERATOR, List.of(FieldType.COUNTRY)),
                 Arguments.of(GlobalFilter.Fields.countryCode, EquipmentType.VOLTAGE_LEVEL, List.of(FieldType.COUNTRY)),
                 Arguments.of(GlobalFilter.Fields.countryCode, EquipmentType.TWO_WINDINGS_TRANSFORMER, List.of(FieldType.COUNTRY)),
                 Arguments.of(GlobalFilter.Fields.countryCode, EquipmentType.LINE, List.of(FieldType.COUNTRY_1, FieldType.COUNTRY_2)),
-                Arguments.of(GlobalFilter.Fields.countryCode, EquipmentType.GENERATOR, Collections.emptyList()),
+                Arguments.of(GlobalFilter.Fields.countryCode, EquipmentType.BATTERY, Collections.emptyList()),
 
                 // Substation properties
                 Arguments.of(GlobalFilter.Fields.substationProperty, EquipmentType.LINE, List.of(FieldType.SUBSTATION_PROPERTIES_1, FieldType.SUBSTATION_PROPERTIES_2)),
