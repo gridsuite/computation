@@ -37,8 +37,8 @@ public class ComputationException extends AbstractBusinessException {
         return errorCode;
     }
 
-    public ComputationException(ComputationBusinessErrorCode exceptionType, String message) {
+    public ComputationException(ComputationBusinessErrorCode errorCode, String message) {
         super(message);
-        this.errorCode = Objects.requireNonNull(exceptionType);
+        this.errorCode = Objects.requireNonNull(errorCode);
     }
 }

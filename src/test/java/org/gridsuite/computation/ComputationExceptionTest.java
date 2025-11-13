@@ -31,7 +31,7 @@ class ComputationExceptionTest {
     }
 
     @Test
-    void testBussinessErrorCodeConstructor() {
+    void testBusinessErrorCodeConstructor() {
         var e = new ComputationException(ComputationBusinessErrorCode.PARAMETERS_NOT_FOUND, "test");
         assertEquals("test", e.getMessage());
         assertEquals(ComputationBusinessErrorCode.PARAMETERS_NOT_FOUND, e.getBusinessErrorCode());
