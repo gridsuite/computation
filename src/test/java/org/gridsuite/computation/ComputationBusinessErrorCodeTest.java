@@ -11,7 +11,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class ComputationBusinessErrorCodeTest {
+class ComputationBusinessErrorCodeTest {
     @ParameterizedTest
     @EnumSource(ComputationBusinessErrorCode.class)
     void valueMatchesEnumName(ComputationBusinessErrorCode code) {
