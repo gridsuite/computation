@@ -19,6 +19,7 @@ class ComputationExceptionTest {
     void testMessageConstructor() {
         var e = new ComputationException("test");
         assertEquals("test", e.getMessage());
+        assertEquals(ComputationBusinessErrorCode.SPECIFIC, e.getBusinessErrorCode());
     }
 
     @Test
@@ -27,5 +28,12 @@ class ComputationExceptionTest {
         var e = new ComputationException("test", cause);
         assertEquals("test", e.getMessage());
         assertEquals(cause, e.getCause());
+    }
+
+    @Test
+    void testBussinessErrorCodeConstructor() {
+        var e = new ComputationException(ComputationBusinessErrorCode.PARAMETERS_NOT_FOUND, "test");
+        assertEquals("test", e.getMessage());
+        assertEquals(ComputationBusinessErrorCode.PARAMETERS_NOT_FOUND, e.getBusinessErrorCode());
     }
 }

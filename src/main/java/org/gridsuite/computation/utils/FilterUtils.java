@@ -34,7 +34,7 @@ public final class FilterUtils {
         try {
             return objectMapper.readValue(jsonString, typeReference);
         } catch (JsonProcessingException e) {
-            throw new ComputationException(INVALID_FILTER_FORMAT);
+            throw new ComputationException(INVALID_FILTER_FORMAT, e.getMessage());
         }
     }
 

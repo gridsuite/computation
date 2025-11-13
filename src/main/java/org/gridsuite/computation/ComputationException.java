@@ -19,12 +19,7 @@ import java.util.Objects;
 @Getter
 public class ComputationException extends AbstractBusinessException {
 
-    protected final BusinessErrorCode errorCode;
-
-    public ComputationException(ComputationBusinessErrorCode exceptionType) {
-        super(Objects.requireNonNull(exceptionType.value()));
-        this.errorCode = Objects.requireNonNull(exceptionType);
-    }
+    private final BusinessErrorCode errorCode;
 
     public ComputationException(String message) {
         super(message);
