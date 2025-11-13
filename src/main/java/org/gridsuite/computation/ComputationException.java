@@ -6,7 +6,10 @@
  */
 package org.gridsuite.computation;
 
+import com.powsybl.ws.commons.error.AbstractBusinessException;
+import com.powsybl.ws.commons.error.BusinessErrorCode;
 import lombok.Getter;
+import lombok.NonNull;
 
 import java.util.Objects;
 
@@ -14,50 +17,38 @@ import java.util.Objects;
  * @author Anis Touri <anis.touri at rte-france.com>
  */
 @Getter
-public class ComputationException extends RuntimeException {
-    public enum Type {
-        RESULT_NOT_FOUND("Result not found."),
-        INVALID_FILTER_FORMAT("The filter format is invalid."),
-        INVALID_SORT_FORMAT("The sort format is invalid"),
-        INVALID_FILTER("Invalid filter"),
-        NETWORK_NOT_FOUND("Network not found"),
-        PARAMETERS_NOT_FOUND("Computation parameters not found"),
-        FILE_EXPORT_ERROR("Error exporting the file"),
-        EVALUATE_FILTER_FAILED("Error evaluating the file"),
-        LIMIT_REDUCTION_CONFIG_ERROR("Error int the configuration of the limit reduction"),
-        SPECIFIC("Unknown error during the computation");
+public class ComputationException extends AbstractBusinessException {
 
-        private final String defaultMessage;
+    protected final BusinessErrorCode errorCode;
 
-        Type(String defaultMessage) {
-            this.defaultMessage = defaultMessage;
-        }
-    }
-
-    private final Type exceptionType;
-
-    public ComputationException(Type exceptionType) {
-        super(Objects.requireNonNull(exceptionType.defaultMessage));
-        this.exceptionType = Objects.requireNonNull(exceptionType);
+    public ComputationException(ComputationBusinessErrorCode exceptionType) {
+        super(Objects.requireNonNull(exceptionType.value()));
+        this.errorCode = Objects.requireNonNull(exceptionType);
     }
 
     public ComputationException(String message) {
         super(message);
-        this.exceptionType = Type.SPECIFIC;
+        this.errorCode = ComputationBusinessErrorCode.SPECIFIC;
     }
 
     public ComputationException(String message, Throwable cause) {
         super(message, cause);
-        this.exceptionType = Type.SPECIFIC;
+        this.errorCode = ComputationBusinessErrorCode.SPECIFIC;
     }
 
-    public ComputationException(Type exceptionType, String message) {
+    @NonNull
+    @Override
+    public BusinessErrorCode getBusinessErrorCode() {
+        return errorCode;
+    }
+
+    public ComputationException(BusinessErrorCode exceptionType, String message) {
         super(message);
-        this.exceptionType = Objects.requireNonNull(exceptionType);
+        this.errorCode = Objects.requireNonNull(exceptionType);
     }
 
-    public ComputationException(Type exceptionType, String message, Throwable cause) {
+    public ComputationException(BusinessErrorCode exceptionType, String message, Throwable cause) {
         super(message, cause);
-        this.exceptionType = Objects.requireNonNull(exceptionType);
+        this.errorCode = Objects.requireNonNull(exceptionType);
     }
 }

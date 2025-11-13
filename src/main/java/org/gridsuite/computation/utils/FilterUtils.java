@@ -16,6 +16,8 @@ import org.gridsuite.computation.dto.ResourceFilterDTO;
 
 import java.util.List;
 
+import static org.gridsuite.computation.ComputationBusinessErrorCode.INVALID_FILTER_FORMAT;
+
 /**
  * @author maissa Souissi <maissa.souissi at rte-france.com>
  */
@@ -32,7 +34,7 @@ public final class FilterUtils {
         try {
             return objectMapper.readValue(jsonString, typeReference);
         } catch (JsonProcessingException e) {
-            throw new ComputationException(ComputationException.Type.INVALID_FILTER_FORMAT);
+            throw new ComputationException(INVALID_FILTER_FORMAT);
         }
     }
 
