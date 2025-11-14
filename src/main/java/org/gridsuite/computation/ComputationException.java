@@ -33,7 +33,7 @@ public class ComputationException extends AbstractBusinessException {
 
     @NonNull
     @Override
-    public BusinessErrorCode getBusinessErrorCode() {
+    public ComputationBusinessErrorCode getBusinessErrorCode() {
         return errorCode;
     }
 
