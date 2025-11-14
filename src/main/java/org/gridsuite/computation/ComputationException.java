@@ -7,7 +7,6 @@
 package org.gridsuite.computation;
 
 import com.powsybl.ws.commons.error.AbstractBusinessException;
-import com.powsybl.ws.commons.error.BusinessErrorCode;
 import lombok.Getter;
 import lombok.NonNull;
 
