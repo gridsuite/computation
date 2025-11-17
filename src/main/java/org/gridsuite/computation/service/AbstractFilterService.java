@@ -38,15 +38,16 @@ public abstract class AbstractFilterService extends AbstractGlobalFilterService 
     protected static final String FILTER_API_VERSION = "v1";
     protected static final String DELIMITER = "/";
 
-    protected final RestTemplate restTemplate = new RestTemplate();
+    protected final RestTemplate restTemplate;
     protected final NetworkStoreService networkStoreService;
     protected final String filterServerBaseUri;
 
     public static final String IDS = "ids";
 
-    protected AbstractFilterService(NetworkStoreService networkStoreService, String filterServerBaseUri) {
+    protected AbstractFilterService(NetworkStoreService networkStoreService, String filterServerBaseUri, RestTemplate restTemplate) {
         this.networkStoreService = networkStoreService;
         this.filterServerBaseUri = filterServerBaseUri;
+        this.restTemplate = restTemplate;
     }
 
     @Override
