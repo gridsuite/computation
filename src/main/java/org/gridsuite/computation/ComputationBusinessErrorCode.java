@@ -13,12 +13,13 @@ public enum ComputationBusinessErrorCode implements BusinessErrorCode {
     INVALID_FILTER_FORMAT("computation.invalidFilterFormat"),
     INVALID_SORT_FORMAT("computation.invalidSortFormat"),
     INVALID_FILTER("computation.invalidFilter"),
+    INVALID_EXPORT_PARAMS("computation.invalidExportParams"),
     NETWORK_NOT_FOUND("computation.networkNotFound"),
     PARAMETERS_NOT_FOUND("computation.parametersNotFound"),
     FILE_EXPORT_ERROR("computation.fileExportError"),
     EVALUATE_FILTER_FAILED("computation.evaluateFilterFailed"),
     LIMIT_REDUCTION_CONFIG_ERROR("computation.limitReductionConfigError"),
-    SPECIFIC("computation.specific"),;
+    SPECIFIC("computation.specific");
 
     private final String code;
 
