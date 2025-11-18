@@ -16,6 +16,7 @@ public enum ComputationBusinessErrorCode implements BusinessErrorCode {
     INVALID_EXPORT_PARAMS("computation.invalidExportParams"),
     NETWORK_NOT_FOUND("computation.networkNotFound"),
     PARAMETERS_NOT_FOUND("computation.parametersNotFound"),
+    INVALID_PARAMETERS("computation.invalidParameters"),
     FILE_EXPORT_ERROR("computation.fileExportError"),
     EVALUATE_FILTER_FAILED("computation.evaluateFilterFailed"),
     LIMIT_REDUCTION_CONFIG_ERROR("computation.limitReductionConfigError"),
