@@ -20,20 +20,15 @@ public class ComputationException extends AbstractBusinessException {
 
     private final ComputationBusinessErrorCode errorCode;
 
-    public ComputationException(String message) {
-        super(message);
-        this.errorCode = ComputationBusinessErrorCode.SPECIFIC;
-    }
-
-    public ComputationException(String message, Throwable cause) {
-        super(message, cause);
-        this.errorCode = ComputationBusinessErrorCode.SPECIFIC;
-    }
-
     @NonNull
     @Override
     public ComputationBusinessErrorCode getBusinessErrorCode() {
         return errorCode;
+    }
+
+    public ComputationException(ComputationBusinessErrorCode errorCode, String message, Throwable cause) {
+        super(message, cause);
+        this.errorCode = errorCode;
     }
 
     public ComputationException(ComputationBusinessErrorCode errorCode, String message) {
