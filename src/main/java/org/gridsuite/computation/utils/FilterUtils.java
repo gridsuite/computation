@@ -10,13 +10,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
-import org.gridsuite.computation.ComputationException;
 import org.gridsuite.computation.dto.GlobalFilter;
 import org.gridsuite.computation.dto.ResourceFilterDTO;
 
+import java.io.UncheckedIOException;
 import java.util.List;
 
-import static org.gridsuite.computation.ComputationBusinessErrorCode.INVALID_FILTER_FORMAT;
 
 /**
  * @author maissa Souissi <maissa.souissi at rte-france.com>
@@ -34,7 +33,7 @@ public final class FilterUtils {
         try {
             return objectMapper.readValue(jsonString, typeReference);
         } catch (JsonProcessingException e) {
-            throw new ComputationException(INVALID_FILTER_FORMAT, e.getMessage());
+            throw new UncheckedIOException(e);
         }
     }
 
