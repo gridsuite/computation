@@ -15,6 +15,7 @@ import org.gridsuite.computation.dto.GlobalFilter;
 import org.gridsuite.computation.dto.ResourceFilterDTO;
 import org.junit.jupiter.api.Test;
 
+import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -73,7 +74,7 @@ class FilterUtilsTest {
 
     @Test
     void testInvalidFilterFormat() {
-        assertThrows(ComputationException.class, () -> FilterUtils.fromStringGlobalFiltersToDTO("titi", objectMapper), "The filter format is invalid.");
+        assertThrows(UncheckedIOException.class, () -> FilterUtils.fromStringGlobalFiltersToDTO("titi", objectMapper), "The filter format is invalid.");
     }
 
     @Test
