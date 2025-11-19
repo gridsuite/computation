@@ -13,7 +13,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -21,9 +20,6 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.web.client.RestClientException;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.context.annotation.Bean;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.UUID;
 
@@ -33,7 +29,7 @@ import static org.assertj.core.api.Assertions.*;
  * @author Mathieu Deharbe <mathieu.deharbe_externe at rte-france.com
  */
 @RestClientTest(ReportService.class)
-@ContextConfiguration(classes = {ComputationConfig.class, ReportService.class, ReportServiceTest.RestTemplateTestConfiguration.class})
+@ContextConfiguration(classes = {ComputationConfig.class, ReportService.class})
 class ReportServiceTest {
     private static final UUID REPORT_UUID = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e4");
     private static final UUID REPORT_ERROR_UUID = UUID.fromString("9928181c-7977-4592-ba19-88027e4254e4");
@@ -92,14 +88,6 @@ class ReportServiceTest {
                 .andExpect(MockRestRequestMatchers.content().bytes(new byte[0]))
                 .andRespond(MockRestResponseCreators.withServerError());
         assertThatThrownBy(() -> reportService.deleteReport(REPORT_ERROR_UUID)).isInstanceOf(RestClientException.class);
-    }
-
-    @TestConfiguration
-    static class RestTemplateTestConfiguration {
-        @Bean
-        RestTemplate restTemplate(RestTemplateBuilder builder) {
-            return builder.build();
-        }
     }
 }
 
