@@ -12,6 +12,7 @@ import org.gridsuite.computation.ComputationConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureMockRestServiceServer;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.http.HttpMethod;
@@ -30,7 +31,6 @@ import static org.assertj.core.api.Assertions.*;
  * @author Mathieu Deharbe <mathieu.deharbe_externe at rte-france.com
  */
 @RestClientTest(ReportService.class)
-@AutoConfigureWebClient(registerRestTemplate = true)
 @ContextConfiguration(classes = {ComputationConfig.class, ReportService.class})
 class ReportServiceTest {
     private static final UUID REPORT_UUID = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e4");
