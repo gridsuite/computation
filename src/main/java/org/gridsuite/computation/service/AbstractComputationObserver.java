@@ -31,6 +31,7 @@ public abstract class AbstractComputationObserver<R, P> {
     protected static final String STATUS_TAG_NAME = "status";
     protected static final String COMPUTATION_TOTAL_COUNTER_NAME = OBSERVATION_PREFIX + "count";
     protected static final String COMPUTATION_CURRENT_COUNTER_NAME = OBSERVATION_PREFIX + "current.count";
+    private static final String UNKNOWN_PROVIDER = "unknown-provider";
 
     private final ObservationRegistry observationRegistry;
     private final MeterRegistry meterRegistry;
@@ -45,12 +46,9 @@ public abstract class AbstractComputationObserver<R, P> {
     protected abstract String getComputationType();
 
     protected Observation createObservation(String name, AbstractComputationRunContext<P> runContext) {
-        Observation observation = Observation.createNotStarted(OBSERVATION_PREFIX + name, observationRegistry)
-                .lowCardinalityKeyValue(TYPE_TAG_NAME, getComputationType());
-        if (runContext.getProvider() != null) {
-            observation.lowCardinalityKeyValue(PROVIDER_TAG_NAME, runContext.getProvider());
-        }
-        return observation;
+        return Observation.createNotStarted(OBSERVATION_PREFIX + name, observationRegistry)
+                .lowCardinalityKeyValue(TYPE_TAG_NAME, getComputationType())
+                .lowCardinalityKeyValue(PROVIDER_TAG_NAME, runContext.getProvider() != null ? runContext.getProvider() : UNKNOWN_PROVIDER);
     }
 
     public <E extends Throwable> void observe(String name, AbstractComputationRunContext<P> runContext, Observation.CheckedRunnable<E> callable) throws E {
@@ -64,13 +62,14 @@ public abstract class AbstractComputationObserver<R, P> {
     public <T extends R, E extends Throwable> T observeRun(
             String name, AbstractComputationRunContext<P> runContext, Observation.CheckedCallable<T, E> callable) throws E {
         T result;
+        String provider = runContext.getProvider() != null ? runContext.getProvider() : UNKNOWN_PROVIDER;
         try {
-            incrementCurrentCount(runContext.getProvider());
+            incrementCurrentCount(provider);
             result = createObservation(name, runContext).observeChecked(callable);
         } finally {
-            decrementCurrentCount(runContext.getProvider());
+            decrementCurrentCount(provider);
         }
-        incrementTotalCount(runContext, result);
+        incrementTotalCount(provider, result);
         return result;
     }
 
@@ -91,13 +90,10 @@ public abstract class AbstractComputationObserver<R, P> {
             .register(meterRegistry);
     }
 
-    private void incrementTotalCount(AbstractComputationRunContext<P> runContext, R result) {
-        Counter.Builder builder =
-                Counter.builder(COMPUTATION_TOTAL_COUNTER_NAME);
-        if (runContext.getProvider() != null) {
-            builder.tag(PROVIDER_TAG_NAME, runContext.getProvider());
-        }
-        builder.tag(TYPE_TAG_NAME, getComputationType())
+    private void incrementTotalCount(String provider, R result) {
+        Counter.builder(COMPUTATION_TOTAL_COUNTER_NAME)
+                .tag(PROVIDER_TAG_NAME, provider)
+                .tag(TYPE_TAG_NAME, getComputationType())
                 .tag(STATUS_TAG_NAME, getResultStatus(result))
                 .register(meterRegistry)
                 .increment();
