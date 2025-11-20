@@ -529,4 +529,15 @@ class ComputationTest implements WithAssertions {
         verify(computationS3Service).downloadFile(S3_KEY);
     }
 
+    @Test
+    void testObserveRunWithNullProvider() {
+        MockComputationObserver observer = new MockComputationObserver(ObservationRegistry.create(), new SimpleMeterRegistry());
+
+        MockComputationRunContext context = new MockComputationRunContext(
+                UUID.randomUUID(), "variantId", "receiver",
+                new ReportInfos(null, "reporter", "computationType"),
+                "userId", null, new Object());
+
+        assertDoesNotThrow(() -> observer.observeRun("testName", context, () -> "result"));
+    }
 }
