@@ -17,6 +17,7 @@ import org.gridsuite.computation.dto.ResourceFilterDTO;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.globalfilter.AbstractGlobalFilterService;
 import org.gridsuite.filter.utils.EquipmentType;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -38,13 +39,14 @@ public abstract class AbstractFilterService extends AbstractGlobalFilterService 
     protected static final String FILTER_API_VERSION = "v1";
     protected static final String DELIMITER = "/";
 
-    protected final RestTemplate restTemplate = new RestTemplate();
+    protected final RestTemplate restTemplate;
     protected final NetworkStoreService networkStoreService;
     protected final String filterServerBaseUri;
 
     public static final String IDS = "ids";
 
-    protected AbstractFilterService(NetworkStoreService networkStoreService, String filterServerBaseUri) {
+    protected AbstractFilterService(RestTemplateBuilder restTemplateBuilder, NetworkStoreService networkStoreService, String filterServerBaseUri) {
+        this.restTemplate = restTemplateBuilder.build();
         this.networkStoreService = networkStoreService;
         this.filterServerBaseUri = filterServerBaseUri;
     }
