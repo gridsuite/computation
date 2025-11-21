@@ -6,6 +6,7 @@
  */
 package org.gridsuite.computation;
 
+import org.gridsuite.computation.error.ComputationBusinessErrorCode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 

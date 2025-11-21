@@ -6,10 +6,11 @@
  */
 package org.gridsuite.computation;
 
+import org.gridsuite.computation.error.ComputationException;
 import org.junit.jupiter.api.Test;
 
-import static org.gridsuite.computation.ComputationBusinessErrorCode.PARAMETERS_NOT_FOUND;
-import static org.gridsuite.computation.ComputationBusinessErrorCode.RUNNER_ERROR;
+import static org.gridsuite.computation.error.ComputationBusinessErrorCode.PARAMETERS_NOT_FOUND;
+import static org.gridsuite.computation.error.ComputationBusinessErrorCode.RUNNER_ERROR;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
