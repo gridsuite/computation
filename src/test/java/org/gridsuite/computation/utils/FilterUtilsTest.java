@@ -10,20 +10,16 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.powsybl.iidm.network.Country;
 import com.powsybl.security.LimitViolationType;
-import org.gridsuite.computation.ComputationException;
 import org.gridsuite.computation.dto.GlobalFilter;
 import org.gridsuite.computation.dto.ResourceFilterDTO;
 import org.junit.jupiter.api.Test;
 
+import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Franck Lecuyer <franck.lecuyer at rte-france.com>
@@ -73,7 +69,7 @@ class FilterUtilsTest {
 
     @Test
     void testInvalidFilterFormat() {
-        assertThrows(ComputationException.class, () -> FilterUtils.fromStringGlobalFiltersToDTO("titi", objectMapper), "The filter format is invalid.");
+        assertThrows(UncheckedIOException.class, () -> FilterUtils.fromStringGlobalFiltersToDTO("titi", objectMapper), "The filter format is invalid.");
     }
 
     @Test
