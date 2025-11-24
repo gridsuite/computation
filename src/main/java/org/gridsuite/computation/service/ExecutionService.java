@@ -9,6 +9,8 @@ package org.gridsuite.computation.service;
 
 import com.powsybl.computation.ComputationManager;
 import com.powsybl.computation.local.LocalComputationManager;
+import io.micrometer.context.ContextExecutorService;
+import io.micrometer.context.ContextSnapshotFactory;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.Getter;
@@ -33,7 +35,8 @@ public class ExecutionService {
     @SneakyThrows
     @PostConstruct
     private void postConstruct() {
-        executorService = Executors.newCachedThreadPool();
+        executorService = ContextExecutorService.wrap(Executors.newCachedThreadPool(),
+                () -> ContextSnapshotFactory.builder().build().captureAll());
         computationManager = new LocalComputationManager(getExecutorService());
     }
 
