@@ -16,7 +16,6 @@ import org.gridsuite.computation.dto.ResourceFilterDTO;
 import java.io.UncheckedIOException;
 import java.util.List;
 
-
 /**
  * @author maissa Souissi <maissa.souissi at rte-france.com>
  */
