@@ -7,14 +7,14 @@
 package org.gridsuite.computation.error.utils;
 
 import com.powsybl.ws.commons.error.PowsyblWsProblemDetail;
+import org.gridsuite.computation.error.AbstractTypedComputationRestResponseEntityExceptionHandler;
 import org.gridsuite.computation.error.ComputationBusinessErrorCode;
 import org.gridsuite.computation.error.ComputationException;
-import org.gridsuite.computation.error.TypedComputationRestResponseEntityExceptionHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-public class TestTypedRestResponseEntityException extends TypedComputationRestResponseEntityExceptionHandler<SpecificErrorCode> {
+public class TestTypedRestResponseEntityException extends AbstractTypedComputationRestResponseEntityExceptionHandler<SpecificErrorCode> {
     public TestTypedRestResponseEntityException() {
         super(() -> "computation-server", SpecificErrorCode.class);
     }
