@@ -14,10 +14,13 @@ import com.powsybl.ws.commons.error.BusinessErrorCode;
  */
 public enum SpecificErrorCode implements BusinessErrorCode {
     MISC("specific.misc");
+
     private final String code;
+
     SpecificErrorCode(String code) {
         this.code = code;
     }
+
     public String value() {
         return code;
     }
