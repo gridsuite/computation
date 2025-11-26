@@ -14,10 +14,10 @@ import org.springframework.http.HttpStatus;
  * @author Hugo Marcellin <hugo.marcelin at rte-france.com>
  */
 
-public abstract class TypedComputationRestResponseEntityExceptionHandler<C extends BusinessErrorCode> extends ComputationRestResponseEntityExceptionHandler {
+public abstract class AbstractTypedComputationRestResponseEntityExceptionHandler<C extends BusinessErrorCode> extends ComputationRestResponseEntityExceptionHandler {
     private final Class<C> specificComputationBusinessErrorCode;
 
-    protected TypedComputationRestResponseEntityExceptionHandler(ServerNameProvider serverNameProvider, Class<C> specificComputationBusinessErrorCode) {
+    protected AbstractTypedComputationRestResponseEntityExceptionHandler(ServerNameProvider serverNameProvider, Class<C> specificComputationBusinessErrorCode) {
         super(serverNameProvider);
         this.specificComputationBusinessErrorCode = specificComputationBusinessErrorCode;
     }
