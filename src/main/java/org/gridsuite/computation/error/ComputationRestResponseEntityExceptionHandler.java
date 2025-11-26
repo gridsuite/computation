@@ -24,9 +24,9 @@ import static org.gridsuite.computation.error.ComputationBusinessErrorCode.RESUL
  */
 
 @ControllerAdvice
-public class RestResponseEntityExceptionHandler extends AbstractBaseRestExceptionHandler<AbstractBusinessException, BusinessErrorCode> {
+public class ComputationRestResponseEntityExceptionHandler extends AbstractBaseRestExceptionHandler<AbstractBusinessException, BusinessErrorCode> {
 
-    protected RestResponseEntityExceptionHandler(ServerNameProvider serverNameProvider) {
+    protected ComputationRestResponseEntityExceptionHandler(ServerNameProvider serverNameProvider) {
         super(serverNameProvider);
     }
 
@@ -39,8 +39,7 @@ public class RestResponseEntityExceptionHandler extends AbstractBaseRestExceptio
     protected HttpStatus mapStatus(BusinessErrorCode businessErrorCode) {
         return switch (businessErrorCode) {
             case RESULT_NOT_FOUND, PARAMETERS_NOT_FOUND -> HttpStatus.NOT_FOUND;
-            case INVALID_SORT_FORMAT,
-                 INVALID_EXPORT_PARAMS -> HttpStatus.BAD_REQUEST;
+            case INVALID_SORT_FORMAT, INVALID_EXPORT_PARAMS -> HttpStatus.BAD_REQUEST;
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
     }

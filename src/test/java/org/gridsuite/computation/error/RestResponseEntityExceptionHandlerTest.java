@@ -4,14 +4,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.gridsuite.computation;
+package org.gridsuite.computation.error;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.powsybl.ws.commons.error.PowsyblWsProblemDetail;
-import org.gridsuite.computation.error.ComputationException;
-import org.gridsuite.computation.error.RestResponseEntityExceptionHandler;
+import org.gridsuite.computation.error.utils.SpecificErrorCode;
+import org.gridsuite.computation.error.utils.TestRestResponseEntityExceptionHandler;
+import org.gridsuite.computation.error.utils.TestTypedRestResponseEntityException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -84,17 +85,25 @@ class RestResponseEntityExceptionHandlerTest {
         assertThat(response.getBody().getChain()).hasSize(1);
     }
 
-    private static final class TestRestResponseEntityExceptionHandler extends RestResponseEntityExceptionHandler {
-        private TestRestResponseEntityExceptionHandler() {
-            super(() -> "computation-server");
-        }
+    @Test
+    void mapsSpecificBusinessErrorToTypedStatus() {
+        TestTypedRestResponseEntityException typed = new TestTypedRestResponseEntityException();
+        ResponseEntity<PowsyblWsProblemDetail> response =
+                typed.invokeHandle(SpecificErrorCode.MISC);
 
-        ResponseEntity<PowsyblWsProblemDetail> invokeHandleDomainException(ComputationException exception, MockHttpServletRequest request) {
-            return super.handleDomainException(exception, request);
-        }
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).isNotNull();
+        assertEquals("specific.misc", response.getBody().getBusinessErrorCode());
+    }
 
-        ResponseEntity<PowsyblWsProblemDetail> invokeHandleRemoteException(HttpClientErrorException exception, MockHttpServletRequest request) {
-            return super.handleRemoteException(exception, request);
-        }
+    @Test
+    void delegatesComputationBusinessErrorToSuperHandler() {
+        TestTypedRestResponseEntityException typed = new TestTypedRestResponseEntityException();
+        ResponseEntity<PowsyblWsProblemDetail> response =
+                typed.invokeHandle(ComputationBusinessErrorCode.RESULT_NOT_FOUND);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertEquals("computation.resultNotFound", response.getBody().getBusinessErrorCode());
     }
 }
