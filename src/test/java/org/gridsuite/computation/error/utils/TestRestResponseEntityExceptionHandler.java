@@ -8,14 +8,14 @@ package org.gridsuite.computation.error.utils;
 
 import com.powsybl.ws.commons.error.PowsyblWsProblemDetail;
 import org.gridsuite.computation.error.ComputationException;
-import org.gridsuite.computation.error.ComputationRestResponseEntityExceptionHandler;
+import org.gridsuite.computation.error.ComputationExceptionHandler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 /**
  * @author Hugo Marcellin <hugo.marcelin at rte-france.com>
  */
-public class TestRestResponseEntityExceptionHandler extends ComputationRestResponseEntityExceptionHandler {
+public class TestRestResponseEntityExceptionHandler extends ComputationExceptionHandler {
     public TestRestResponseEntityExceptionHandler() {
         super(() -> "computation-server");
     }

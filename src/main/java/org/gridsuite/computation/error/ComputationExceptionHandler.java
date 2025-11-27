@@ -7,19 +7,23 @@
 package org.gridsuite.computation.error;
 
 import com.powsybl.ws.commons.error.AbstractBusinessExceptionHandler;
+import com.powsybl.ws.commons.error.PowsyblWsProblemDetail;
 import com.powsybl.ws.commons.error.ServerNameProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 /**
  * @author Hugo Marcellin <hugo.marcelin at rte-france.com>
  */
 
 @ControllerAdvice
-public class ComputationRestResponseEntityExceptionHandler extends AbstractBusinessExceptionHandler<ComputationException, ComputationBusinessErrorCode> {
+public class ComputationExceptionHandler extends AbstractBusinessExceptionHandler<ComputationException, ComputationBusinessErrorCode> {
 
-    protected ComputationRestResponseEntityExceptionHandler(ServerNameProvider serverNameProvider) {
+    protected ComputationExceptionHandler(ServerNameProvider serverNameProvider) {
         super(serverNameProvider);
     }
 
@@ -35,5 +39,10 @@ public class ComputationRestResponseEntityExceptionHandler extends AbstractBusin
             case INVALID_SORT_FORMAT, INVALID_EXPORT_PARAMS -> HttpStatus.BAD_REQUEST;
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
+    }
+
+    @ExceptionHandler(ComputationException.class)
+    public ResponseEntity<PowsyblWsProblemDetail> handleComputationException(ComputationException exception, HttpServletRequest request) {
+        return super.handleDomainException(exception, request);
     }
 }
