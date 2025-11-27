@@ -50,6 +50,9 @@
 
         <sonar.organization>gridsuite</sonar.organization>
         <sonar.projectKey>org.gridsuite:computation</sonar.projectKey>
+
+        <!-- To remove after when using gridsuite dependencies release and ws commons version containing merged PR: https://github.com/powsybl/powsybl-ws-commons/pull/167 -->
+        <powsybl-ws-commons.version>1.34.0-SNAPSHOT</powsybl-ws-commons.version>
     </properties>
 
     <build>
@@ -173,6 +176,7 @@
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-ws-commons</artifactId>
+            <version>${powsybl-ws-commons.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>

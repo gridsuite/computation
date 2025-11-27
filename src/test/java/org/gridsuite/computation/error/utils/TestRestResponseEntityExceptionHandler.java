@@ -11,7 +11,6 @@ import org.gridsuite.computation.error.ComputationException;
 import org.gridsuite.computation.error.ComputationRestResponseEntityExceptionHandler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.web.client.HttpClientErrorException;
 
 /**
  * @author Hugo Marcellin <hugo.marcelin at rte-france.com>
@@ -23,9 +22,5 @@ public class TestRestResponseEntityExceptionHandler extends ComputationRestRespo
 
     public ResponseEntity<PowsyblWsProblemDetail> invokeHandleDomainException(ComputationException exception, MockHttpServletRequest request) {
         return super.handleDomainException(exception, request);
-    }
-
-    public ResponseEntity<PowsyblWsProblemDetail> invokeHandleRemoteException(HttpClientErrorException exception, MockHttpServletRequest request) {
-        return super.handleRemoteException(exception, request);
     }
 }
