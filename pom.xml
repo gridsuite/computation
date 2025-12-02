@@ -82,13 +82,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Import -->
             <dependency>
                 <groupId>com.powsybl</groupId>
                 <artifactId>powsybl-ws-commons</artifactId>
                 <version>${powsybl-ws-commons.version}</version>
             </dependency>
 
-            <!-- Import -->
             <dependency>
                 <groupId>com.powsybl</groupId>
                 <artifactId>powsybl-ws-dependencies</artifactId>
