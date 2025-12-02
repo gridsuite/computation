@@ -8,6 +8,9 @@ package org.gridsuite.computation.error;
 
 import com.powsybl.ws.commons.error.BusinessErrorCode;
 
+/**
+ * @author Hugo Marcellin <hugo.marcelin at rte-france.com>
+ */
 public enum ComputationBusinessErrorCode implements BusinessErrorCode {
     RESULT_NOT_FOUND("computation.resultNotFound"),
     PARAMETERS_NOT_FOUND("computation.parametersNotFound"),

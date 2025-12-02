@@ -12,6 +12,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+/**
+ * @author Hugo Marcellin <hugo.marcelin at rte-france.com>
+ */
 class ComputationBusinessErrorCodeTest {
     @ParameterizedTest
     @EnumSource(ComputationBusinessErrorCode.class)
