@@ -52,7 +52,7 @@
         <sonar.projectKey>org.gridsuite:computation</sonar.projectKey>
 
         <!-- To remove after when using gridsuite dependencies release and ws commons version containing merged PR: https://github.com/powsybl/powsybl-ws-commons/pull/167 -->
-        <powsybl-ws-commons.version>1.34.0-SNAPSHOT</powsybl-ws-commons.version>
+        <powsybl-ws-commons.version>1.34.0</powsybl-ws-commons.version>
     </properties>
 
     <build>
