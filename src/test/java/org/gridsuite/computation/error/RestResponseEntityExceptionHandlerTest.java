@@ -7,7 +7,6 @@
 package org.gridsuite.computation.error;
 
 import com.powsybl.ws.commons.error.PowsyblWsProblemDetail;
-import org.gridsuite.computation.error.utils.TestRestResponseEntityExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -21,18 +20,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RestResponseEntityExceptionHandlerTest {
 
-    private TestRestResponseEntityExceptionHandler handler;
+    private ComputationExceptionHandler handler;
 
     @BeforeEach
     void setUp() {
-        handler = new TestRestResponseEntityExceptionHandler();
+        handler = new ComputationExceptionHandler(() -> "computation");
     }
 
     @Test
     void mapsNotFoundBusinessErrorToStatus() {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/results-endpoint/uuid");
         ComputationException exception = new ComputationException(RESULT_NOT_FOUND, "Result not found");
-        ResponseEntity<PowsyblWsProblemDetail> response = handler.invokeHandleDomainException(exception, request);
+        ResponseEntity<PowsyblWsProblemDetail> response = handler.handleComputationException(exception, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNotNull();
@@ -43,7 +42,7 @@ class RestResponseEntityExceptionHandlerTest {
     void mapsBadRequestBusinessErrorToStatus() {
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/results-endpoint/uuid");
         ComputationException exception = new ComputationException(INVALID_SORT_FORMAT, "Invalid sort format");
-        ResponseEntity<PowsyblWsProblemDetail> response = handler.invokeHandleDomainException(exception, request);
+        ResponseEntity<PowsyblWsProblemDetail> response = handler.handleComputationException(exception, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
