@@ -18,7 +18,7 @@ import static org.gridsuite.computation.error.ComputationBusinessErrorCode.INVAL
 import static org.gridsuite.computation.error.ComputationBusinessErrorCode.RESULT_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class RestResponseEntityExceptionHandlerTest {
+class ComputationExceptionHandlerTest {
 
     private ComputationExceptionHandler handler;
 
