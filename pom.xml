@@ -43,7 +43,7 @@
 
     <properties>
         <powsybl-ws-dependencies.version>2.27.0</powsybl-ws-dependencies.version>
-        <gridsuite-filter.version>1.13.0</gridsuite-filter.version>
+        <gridsuite-filter.version>1.15.0</gridsuite-filter.version>
 
         <org.hamcrest.version>2.2</org.hamcrest.version>
         <spring-cloud-aws.version>3.3.0</spring-cloud-aws.version>
@@ -170,6 +170,10 @@
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-core</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>context-propagation</artifactId>
         </dependency>
 
         <!-- Powsybl -->
