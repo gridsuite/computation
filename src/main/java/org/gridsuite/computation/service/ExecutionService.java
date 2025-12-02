@@ -31,12 +31,11 @@ public class ExecutionService {
     private ExecutorService executorService;
 
     private ComputationManager computationManager;
-    private ContextSnapshotFactory snapshotFactory;
 
     @SneakyThrows
     @PostConstruct
     private void postConstruct() {
-        snapshotFactory = ContextSnapshotFactory.builder().build();
+        ContextSnapshotFactory snapshotFactory = ContextSnapshotFactory.builder().build();
         executorService = ContextExecutorService.wrap(Executors.newCachedThreadPool(),
             snapshotFactory::captureAll);
         computationManager = new LocalComputationManager(getExecutorService());
