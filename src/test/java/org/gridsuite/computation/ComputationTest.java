@@ -26,6 +26,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.WithAssertions;
 import org.gridsuite.computation.dto.ReportInfos;
+import org.gridsuite.computation.error.ComputationException;
 import org.gridsuite.computation.s3.ComputationS3Service;
 import org.gridsuite.computation.s3.S3InputStreamInfos;
 import org.gridsuite.computation.service.*;
@@ -529,4 +530,15 @@ class ComputationTest implements WithAssertions {
         verify(computationS3Service).downloadFile(S3_KEY);
     }
 
+    @Test
+    void testObserveRunWithNullProvider() {
+        MockComputationObserver observer = new MockComputationObserver(ObservationRegistry.create(), new SimpleMeterRegistry());
+
+        MockComputationRunContext context = new MockComputationRunContext(
+                UUID.randomUUID(), "variantId", "receiver",
+                new ReportInfos(null, "reporter", "computationType"),
+                "userId", null, new Object());
+
+        assertDoesNotThrow(() -> observer.observeRun("testName", context, () -> "result"));
+    }
 }
