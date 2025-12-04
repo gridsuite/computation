@@ -12,6 +12,7 @@ import com.powsybl.commons.PowsyblException;
 import com.powsybl.commons.report.ReportNode;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -41,10 +42,10 @@ public class ReportService {
 
     public ReportService(ObjectMapper objectMapper,
                          @Value("${gridsuite.services.report-server.base-uri:http://report-server/}") String reportServerBaseUri,
-                         RestTemplate restTemplate) {
+                         RestTemplateBuilder restTemplateBuilder) {
         this.reportServerBaseUri = reportServerBaseUri;
         this.objectMapper = objectMapper;
-        this.restTemplate = restTemplate;
+        this.restTemplate = restTemplateBuilder.build();
     }
 
     private String getReportServerURI() {
