@@ -18,6 +18,7 @@ import com.powsybl.ws.commons.ZipUtils;
 import com.powsybl.ws.commons.error.PowsyblWsProblemDetail;
 import com.powsybl.ws.commons.error.ServerNameProvider;
 import org.apache.commons.lang3.StringUtils;
+import org.gridsuite.computation.error.ComputationRunException;
 import org.gridsuite.computation.s3.ComputationS3Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,7 +186,7 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
             } catch (Exception e) {
                 resultService.delete(resultContext.getResultUuid());
                 this.handleNonCancellationException(resultContext, e, rootReporter);
-                throw new RuntimeException(PowsyblWsProblemDetail.fromException(e, serverNameProvider.serverName()).toString(), e);
+                throw new ComputationRunException(PowsyblWsProblemDetail.fromException(e, serverNameProvider.serverName()).toString(), e);
             } finally {
                 if (Boolean.TRUE.equals(resultContext.getRunContext().getDebug())) {
                     processDebug(resultContext);

@@ -27,6 +27,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.WithAssertions;
 import org.gridsuite.computation.dto.ReportInfos;
+import org.gridsuite.computation.error.ComputationRunException;
 import org.gridsuite.computation.s3.ComputationS3Service;
 import org.gridsuite.computation.s3.S3InputStreamInfos;
 import org.gridsuite.computation.service.*;
@@ -319,9 +320,9 @@ class ComputationTest implements WithAssertions {
         // inits
         initComputationExecution();
         runContext.setComputationResWanted(ComputationResultWanted.FAIL);
-
+        var consumer = workerService.consumeRun();
         // execution / cleaning
-        assertThrows(RuntimeException.class, () -> workerService.consumeRun().accept(message));
+        assertThrows(ComputationRunException.class, () -> consumer.accept(message));
         assertNull(resultService.findStatus(RESULT_UUID));
     }
 
