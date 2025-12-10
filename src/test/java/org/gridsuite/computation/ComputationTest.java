@@ -17,6 +17,7 @@ import com.powsybl.iidm.network.VariantManager;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
 import com.powsybl.ws.commons.ZipUtils;
+import com.powsybl.ws.commons.error.ServerNameProvider;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.micrometer.observation.ObservationRegistry;
@@ -26,7 +27,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.WithAssertions;
 import org.gridsuite.computation.dto.ReportInfos;
-import org.gridsuite.computation.error.ComputationException;
+import org.gridsuite.computation.error.ComputationRunException;
 import org.gridsuite.computation.s3.ComputationS3Service;
 import org.gridsuite.computation.s3.S3InputStreamInfos;
 import org.gridsuite.computation.service.*;
@@ -187,9 +188,21 @@ class ComputationTest implements WithAssertions {
         COMPLETED
     }
 
-    private static class MockComputationWorkerService extends AbstractWorkerService<Object, MockComputationRunContext, Object, MockComputationResultService> {
-        protected MockComputationWorkerService(NetworkStoreService networkStoreService, NotificationService notificationService, ReportService reportService, MockComputationResultService resultService, ComputationS3Service computationS3Service, ExecutionService executionService, AbstractComputationObserver<Object, Object> observer, ObjectMapper objectMapper) {
-            super(networkStoreService, notificationService, reportService, resultService, computationS3Service, executionService, observer, objectMapper);
+    private static class MockComputationWorkerService
+        extends AbstractWorkerService<Object, MockComputationRunContext, Object, MockComputationResultService> {
+        protected MockComputationWorkerService(
+            NetworkStoreService networkStoreService,
+            NotificationService notificationService,
+            ReportService reportService,
+            MockComputationResultService resultService,
+            ComputationS3Service computationS3Service,
+            ExecutionService executionService,
+            AbstractComputationObserver<Object, Object> observer,
+            ObjectMapper objectMapper,
+            ServerNameProvider serverNameProvider
+        ) {
+            super(networkStoreService, notificationService, reportService, resultService, computationS3Service,
+                executionService, observer, objectMapper, serverNameProvider);
         }
 
         @Override
@@ -261,7 +274,8 @@ class ComputationTest implements WithAssertions {
                 computationS3Service,
                 executionService,
                 new MockComputationObserver(ObservationRegistry.create(), new SimpleMeterRegistry()),
-                objectMapper
+                objectMapper,
+                () -> "test"
         );
         computationService = new MockComputationService(notificationService, resultService, computationS3Service, objectMapper, uuidGeneratorService, provider);
 
@@ -306,9 +320,9 @@ class ComputationTest implements WithAssertions {
         // inits
         initComputationExecution();
         runContext.setComputationResWanted(ComputationResultWanted.FAIL);
-
+        var consumer = workerService.consumeRun();
         // execution / cleaning
-        assertThrows(ComputationException.class, () -> workerService.consumeRun().accept(message));
+        assertThrows(ComputationRunException.class, () -> consumer.accept(message));
         assertNull(resultService.findStatus(RESULT_UUID));
     }
 
@@ -430,7 +444,8 @@ class ComputationTest implements WithAssertions {
                 null,
                 executionService,
                 new MockComputationObserver(ObservationRegistry.create(), new SimpleMeterRegistry()),
-                objectMapper
+                objectMapper,
+                () -> "test"
         );
         initComputationExecution();
         runContext.setComputationResWanted(ComputationResultWanted.SUCCESS);

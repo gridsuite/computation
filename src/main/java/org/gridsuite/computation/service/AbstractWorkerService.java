@@ -15,9 +15,10 @@ import com.powsybl.iidm.network.VariantManagerConstants;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
 import com.powsybl.ws.commons.ZipUtils;
+import com.powsybl.ws.commons.error.PowsyblWsProblemDetail;
+import com.powsybl.ws.commons.error.ServerNameProvider;
 import org.apache.commons.lang3.StringUtils;
-import org.gridsuite.computation.error.ComputationBusinessErrorCode;
-import org.gridsuite.computation.error.ComputationException;
+import org.gridsuite.computation.error.ComputationRunException;
 import org.gridsuite.computation.s3.ComputationS3Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +71,7 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
     protected final Map<UUID, CompletableFuture<R>> futures = new ConcurrentHashMap<>();
     protected final Map<UUID, CancelContext> cancelComputationRequests = new ConcurrentHashMap<>();
     protected final S resultService;
+    protected final ServerNameProvider serverNameProvider;
 
     protected final ComputationS3Service computationS3Service;
 
@@ -79,8 +81,9 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
                                     S resultService,
                                     ExecutionService executionService,
                                     AbstractComputationObserver<R, P> observer,
-                                    ObjectMapper objectMapper) {
-        this(networkStoreService, notificationService, reportService, resultService, null, executionService, observer, objectMapper);
+                                    ObjectMapper objectMapper,
+                                    ServerNameProvider serverNameProvider) {
+        this(networkStoreService, notificationService, reportService, resultService, null, executionService, observer, objectMapper, serverNameProvider);
     }
 
     protected AbstractWorkerService(NetworkStoreService networkStoreService,
@@ -90,7 +93,8 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
                                     ComputationS3Service computationS3Service,
                                     ExecutionService executionService,
                                     AbstractComputationObserver<R, P> observer,
-                                    ObjectMapper objectMapper) {
+                                    ObjectMapper objectMapper,
+                                    ServerNameProvider serverNameProvider) {
         this.networkStoreService = networkStoreService;
         this.notificationService = notificationService;
         this.reportService = reportService;
@@ -99,6 +103,7 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
         this.executionService = executionService;
         this.observer = observer;
         this.objectMapper = objectMapper;
+        this.serverNameProvider = serverNameProvider;
     }
 
     protected PreloadingStrategy getNetworkPreloadingStrategy() {
@@ -181,7 +186,7 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
             } catch (Exception e) {
                 resultService.delete(resultContext.getResultUuid());
                 this.handleNonCancellationException(resultContext, e, rootReporter);
-                throw new ComputationException(ComputationBusinessErrorCode.RUNNER_ERROR, String.format("%s: %s", NotificationService.getFailedMessage(getComputationType()), e.getMessage()), e.getCause());
+                throw new ComputationRunException(PowsyblWsProblemDetail.fromException(e, serverNameProvider.serverName()).toString(), e);
             } finally {
                 if (Boolean.TRUE.equals(resultContext.getRunContext().getDebug())) {
                     processDebug(resultContext);
