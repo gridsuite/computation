@@ -58,7 +58,7 @@ class FilterUtilsTest {
         UUID uuid1 = UUID.randomUUID();
         UUID uuid2 = UUID.randomUUID();
         globalFilter = new GlobalFilter();
-        globalFilter.setNominalV(List.of("380", "225"));
+        globalFilter.setVoltageRanges(List.of(List.of(300, 500), List.of(200, 300)));
         globalFilter.setCountryCode(List.of(Country.FR, Country.BE));
         globalFilter.setGenericFilter(List.of(uuid1, uuid2));
         globalFilter.setSubstationProperty(Map.of());
