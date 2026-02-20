@@ -43,7 +43,7 @@
 
     <properties>
         <powsybl-ws-dependencies.version>2.30.0</powsybl-ws-dependencies.version>
-        <gridsuite-filter.version>1.19.0</gridsuite-filter.version>
+        <gridsuite-filter.version>1.21.0</gridsuite-filter.version>
         <org.hamcrest.version>2.2</org.hamcrest.version>
         <spring-cloud-aws.version>3.3.0</spring-cloud-aws.version>
         <sonar.organization>gridsuite</sonar.organization>
