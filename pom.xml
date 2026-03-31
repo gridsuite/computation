@@ -152,6 +152,12 @@
             <artifactId>spring-cloud-aws-starter-s3</artifactId>
         </dependency>
 
+        <!-- AMQP - rabbitmq -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
         <!-- AspectJ -->
         <dependency>
             <groupId>org.aspectj</groupId>
