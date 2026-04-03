@@ -112,8 +112,10 @@
         <!-- COMPILATION DEPENDENCIES                      -->
         <!-- ============================================= -->
 
-        <!-- downgrade of sdk is needed since spring-cloud-aws 3.3 to 3.4 upgrade -->
+        <!-- downgrade of sdk from 2.31.78 to 2.29.52 is needed since spring-cloud-aws-starter-s3 3.3 to 3.4 upgrade -->
         <!-- See https://github.com/aws/aws-sdk-java-v2/discussions/5802  -->
+        <!-- Is there an easier way to to be compatible with 3rd party aws implementations? -->
+        <!-- maybe we should look for a less opinionated/more compatible s3 client than awssdk ? -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3</artifactId>
