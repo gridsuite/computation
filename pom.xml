@@ -45,9 +45,10 @@
         <powsybl-ws-dependencies.version>2.31.0</powsybl-ws-dependencies.version>
         <gridsuite-filter.version>1.21.0</gridsuite-filter.version>
         <org.hamcrest.version>2.2</org.hamcrest.version>
-        <spring-cloud-aws.version>3.4.0</spring-cloud-aws.version>
+        <spring-cloud-aws.version>3.4.2</spring-cloud-aws.version>
         <sonar.organization>gridsuite</sonar.organization>
         <sonar.projectKey>org.gridsuite:computation</sonar.projectKey>
+        <aws-sdk.version>2.29.52</aws-sdk.version>
     </properties>
 
     <build>
@@ -110,6 +111,17 @@
         <!-- ============================================= -->
         <!-- COMPILATION DEPENDENCIES                      -->
         <!-- ============================================= -->
+
+        <!-- downgrade of sdk from 2.31.78 to 2.29.52 is needed since spring-cloud-aws-starter-s3 3.3 to 3.4 upgrade -->
+        <!-- See https://github.com/aws/aws-sdk-java-v2/discussions/5802  -->
+        <!-- Is there an easier way to to be compatible with 3rd party aws implementations? -->
+        <!-- maybe we should look for a less opinionated/more compatible s3 client than awssdk ? -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>${aws-sdk.version}</version>
+        </dependency>
+
         <!-- Jackson -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
