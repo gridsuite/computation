@@ -8,8 +8,8 @@ package org.gridsuite.computation.utils;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.powsybl.contingency.violations.LimitViolationType;
 import com.powsybl.iidm.network.Country;
-import com.powsybl.security.LimitViolationType;
 import org.gridsuite.computation.dto.GlobalFilter;
 import org.gridsuite.computation.dto.ResourceFilterDTO;
 import org.junit.jupiter.api.Test;
