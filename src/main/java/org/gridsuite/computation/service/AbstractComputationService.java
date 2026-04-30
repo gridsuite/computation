@@ -9,6 +9,8 @@ package org.gridsuite.computation.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.powsybl.commons.PowsyblException;
 import lombok.Getter;
+
+import org.gridsuite.computation.error.ComputationException;
 import org.gridsuite.computation.s3.ComputationS3Service;
 import org.gridsuite.computation.s3.S3InputStreamInfos;
 import org.springframework.core.io.InputStreamResource;
@@ -22,9 +24,11 @@ import org.springframework.util.CollectionUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import static org.gridsuite.computation.error.ComputationBusinessErrorCode.EMPTY_PARAMS;
 import static org.gridsuite.computation.s3.ComputationS3Service.S3_SERVICE_NOT_AVAILABLE_MESSAGE;
 
 /**
@@ -99,6 +103,13 @@ public abstract class AbstractComputationService<C extends AbstractComputationRu
 
     public S getStatus(UUID resultUuid) {
         return resultService.findStatus(resultUuid);
+    }
+
+    public Map<UUID, S> getStatuses(List<UUID> resultUuids) {
+        if (resultUuids.isEmpty()) {
+            throw new ComputationException(EMPTY_PARAMS, "Result uuids cannot be empty");
+        }
+        return resultService.findStatuses(resultUuids);
     }
 
     public ResponseEntity<Resource> downloadDebugFile(UUID resultUuid) {
