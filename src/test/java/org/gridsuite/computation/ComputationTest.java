@@ -27,7 +27,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.WithAssertions;
 import org.gridsuite.computation.dto.ReportInfos;
-import org.gridsuite.computation.error.ComputationException;
 import org.gridsuite.computation.error.ComputationRunException;
 import org.gridsuite.computation.s3.ComputationS3Service;
 import org.gridsuite.computation.s3.S3InputStreamInfos;
@@ -385,7 +384,7 @@ class ComputationTest implements WithAssertions {
     }
 
     @Test
-    void testGetStatusesReturnsStatuses() {
+    void testGetStatuses() {
         UUID firstResultUuid = UUID.randomUUID();
         UUID secondResultUuid = UUID.randomUUID();
         computationService.setStatus(List.of(firstResultUuid), MockComputationStatus.RUNNING);
@@ -398,9 +397,10 @@ class ComputationTest implements WithAssertions {
     }
 
     @Test
-    void testGetStatusesThrowsWhenResultUuidsEmpty() {
+    void testGetStatusesWithNoResultUuids() {
         List<UUID> emptyResultUuids = List.of();
-        assertThrows(ComputationException.class, () -> computationService.getStatuses(emptyResultUuids));
+        assertThat(computationService.getStatuses(emptyResultUuids)).isEmpty();
+        assertThat(computationService.getStatuses(null)).isEmpty();
     }
 
     @Test
