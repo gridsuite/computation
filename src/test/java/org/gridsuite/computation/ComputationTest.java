@@ -133,9 +133,11 @@ class ComputationTest implements WithAssertions {
             return mockDBStatus.get(resultUuid);
         }
 
-        @Override
+        `@Override`
         public Map<UUID, MockComputationStatus> findStatuses(List<UUID> resultUuids) {
-            return resultUuids.stream().collect(Collectors.toMap(Function.identity(), mockDBStatus::get));
+            return resultUuids.stream()
+                    .filter(mockDBStatus::containsKey)
+                    .collect(Collectors.toMap(Function.identity(), mockDBStatus::get));
         }
     }
 
