@@ -47,7 +47,15 @@ public final class SpecificationUtils {
         );
     }
 
+    public static <X> Specification<X> equals(String field, boolean value) {
+        return (root, cq, cb) -> cb.equal(getColumnPath(root, field), value);
+    }
+
     public static <X> Specification<X> notEqual(String field, String value) {
+        return (root, cq, cb) -> cb.notEqual(getColumnPath(root, field), value);
+    }
+
+    public static <X> Specification<X> notEqual(String field, boolean value) {
         return (root, cq, cb) -> cb.notEqual(getColumnPath(root, field), value);
     }
 
@@ -123,6 +131,8 @@ public final class SpecificationUtils {
                 completedSpecification = appendTextFilterToSpecification(completedSpecification, resourceFilter);
             } else if (resourceFilter.dataType() == ResourceFilterDTO.DataType.NUMBER) {
                 completedSpecification = appendNumberFilterToSpecification(completedSpecification, resourceFilter);
+            } else if (resourceFilter.dataType() == ResourceFilterDTO.DataType.BOOLEAN) {
+                completedSpecification = appendBooleanFilterToSpecification(completedSpecification, resourceFilter);
             }
         }
 
@@ -228,6 +238,17 @@ public final class SpecificationUtils {
                     specification.and(greaterThanOrEqual(resourceFilter.column(), valueDouble, tolerance));
             case EQUALS -> specification.and(greaterThanOrEqual(resourceFilter.column(), valueDouble, tolerance))
                     .and(lessThanOrEqual(resourceFilter.column(), valueDouble, tolerance));
+            default ->
+                    throw new IllegalArgumentException("The filter type " + resourceFilter.type() + " is not supported with the data type " + resourceFilter.dataType());
+        };
+    }
+
+    @NonNull
+    private static <X> Specification<X> appendBooleanFilterToSpecification(Specification<X> specification, ResourceFilterDTO resourceFilter) {
+        boolean filterValue = Boolean.parseBoolean(resourceFilter.value().toString());
+        return switch (resourceFilter.type()) {
+            case NOT_EQUAL -> specification.and(notEqual(resourceFilter.column(), filterValue));
+            case EQUALS -> specification.and(equals(resourceFilter.column(), filterValue));
             default ->
                     throw new IllegalArgumentException("The filter type " + resourceFilter.type() + " is not supported with the data type " + resourceFilter.dataType());
         };
