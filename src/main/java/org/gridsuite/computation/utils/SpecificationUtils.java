@@ -172,7 +172,7 @@ public final class SpecificationUtils {
                 }
             }
             case STARTS_WITH ->
-                    completedSpecification = completedSpecification.and(startsWith(resourceFilter.column(), resourceFilter.value().toString()));
+                completedSpecification = completedSpecification.and(startsWith(resourceFilter.column(), resourceFilter.value().toString()));
             default -> throw new IllegalArgumentException("The filter type " + resourceFilter.type() + " is not supported with the data type " + resourceFilter.dataType());
         }
 
@@ -223,9 +223,9 @@ public final class SpecificationUtils {
         return switch (resourceFilter.type()) {
             case NOT_EQUAL -> specification.and(notEqual(resourceFilter.column(), valueDouble, tolerance));
             case LESS_THAN_OR_EQUAL ->
-                    specification.and(lessThanOrEqual(resourceFilter.column(), valueDouble, tolerance));
+                specification.and(lessThanOrEqual(resourceFilter.column(), valueDouble, tolerance));
             case GREATER_THAN_OR_EQUAL ->
-                    specification.and(greaterThanOrEqual(resourceFilter.column(), valueDouble, tolerance));
+                specification.and(greaterThanOrEqual(resourceFilter.column(), valueDouble, tolerance));
             case EQUALS -> specification.and(greaterThanOrEqual(resourceFilter.column(), valueDouble, tolerance))
                     .and(lessThanOrEqual(resourceFilter.column(), valueDouble, tolerance));
             default ->

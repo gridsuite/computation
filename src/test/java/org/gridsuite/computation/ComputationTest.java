@@ -107,7 +107,7 @@ class ComputationTest implements WithAssertions {
         COMPLETED
     }
 
-    private static class MockComputationResultService extends AbstractComputationResultService<MockComputationStatus> {
+    private static final class MockComputationResultService extends AbstractComputationResultService<MockComputationStatus> {
         Map<UUID, MockComputationStatus> mockDBStatus = new HashMap<>();
 
         @Override
