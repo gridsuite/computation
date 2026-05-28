@@ -7,6 +7,7 @@
 package org.gridsuite.computation.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -21,7 +22,11 @@ public abstract class AbstractComputationResultService<S> {
 
     public abstract void deleteAll();
 
-    public abstract S findStatus(UUID resultUuid);
+    public S findStatus(UUID resultUuid) {
+        return findStatuses(List.of(resultUuid)).get(resultUuid);
+    }
+
+    public abstract Map<UUID, S> findStatuses(List<UUID> resultUuids);
 
     // --- Must implement these following methods if a computation server supports s3 storage --- //
     public void saveDebugFileLocation(UUID resultUuid, String debugFilePath) {
