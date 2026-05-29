@@ -166,7 +166,8 @@ class ComputationTest implements WithAssertions {
     }
 
     private static class MockComputationService extends AbstractComputationService<MockComputationRunContext, MockComputationResultService, MockComputationStatus> {
-        protected MockComputationService(NotificationService notificationService, MockComputationResultService resultService, ComputationS3Service computationS3Service, ObjectMapper objectMapper, UuidGeneratorService uuidGeneratorService, String defaultProvider) {
+        protected MockComputationService(NotificationService notificationService, MockComputationResultService resultService, ComputationS3Service computationS3Service, ObjectMapper objectMapper,
+                UuidGeneratorService uuidGeneratorService, String defaultProvider) {
             super(notificationService, resultService, computationS3Service, objectMapper, uuidGeneratorService, defaultProvider);
         }
 

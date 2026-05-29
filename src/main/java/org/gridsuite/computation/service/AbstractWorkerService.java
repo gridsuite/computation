@@ -157,6 +157,7 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
         return result != null;
     }
 
+    @SuppressWarnings("checkstyle:LambdaBodyLength")
     public Consumer<Message<String>> consumeRun() {
         return message -> {
             AbstractResultContext<C> resultContext = fromMessage(message);
