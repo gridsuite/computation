@@ -143,7 +143,7 @@ class CommonSpecificationBuilderTest {
     }
 
     // test specific dummy implementation
-    private static class CommonSpecificationBuilderTestImpl extends AbstractCommonSpecificationBuilder<Object> {
+    private static final class CommonSpecificationBuilderTestImpl extends AbstractCommonSpecificationBuilder<Object> {
 
         @Override
         public boolean isNotParentFilter(ResourceFilterDTO filter) {
