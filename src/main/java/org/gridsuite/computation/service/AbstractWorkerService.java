@@ -157,44 +157,45 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
         return result != null;
     }
 
-    @SuppressWarnings("checkstyle:LambdaBodyLength")
     public Consumer<Message<String>> consumeRun() {
-        return message -> {
-            AbstractResultContext<C> resultContext = fromMessage(message);
-            AtomicReference<ReportNode> rootReporter = new AtomicReference<>(ReportNode.NO_OP);
-            try {
-                Network network = getNetwork(resultContext.getRunContext().getNetworkUuid(),
-                        resultContext.getRunContext().getVariantId());
-                resultContext.getRunContext().setNetwork(network);
-                observer.observe("global.run", resultContext.getRunContext(), () -> {
-                    long startTime = System.nanoTime();
-                    R result = run(resultContext.getRunContext(), resultContext.getResultUuid(), rootReporter);
+        return this::handleRunMessage;
+    }
 
-                    LOGGER.info("Just run in {}s", TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime));
+    private void handleRunMessage(Message<String> message) {
+        AbstractResultContext<C> resultContext = fromMessage(message);
+        AtomicReference<ReportNode> rootReporter = new AtomicReference<>(ReportNode.NO_OP);
+        try {
+            Network network = getNetwork(resultContext.getRunContext().getNetworkUuid(),
+                    resultContext.getRunContext().getVariantId());
+            resultContext.getRunContext().setNetwork(network);
+            observer.observe("global.run", resultContext.getRunContext(), () -> {
+                long startTime = System.nanoTime();
+                R result = run(resultContext.getRunContext(), resultContext.getResultUuid(), rootReporter);
 
-                    if (resultCanBeSaved(result)) {
-                        startTime = System.nanoTime();
-                        observer.observe("results.save", resultContext.getRunContext(), () -> saveResult(network, resultContext, result));
+                LOGGER.info("Just run in {}s", TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime));
 
-                        LOGGER.info("Stored in {}s", TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime));
+                if (resultCanBeSaved(result)) {
+                    startTime = System.nanoTime();
+                    observer.observe("results.save", resultContext.getRunContext(), () -> saveResult(network, resultContext, result));
 
-                        sendResultMessage(resultContext, result);
-                        LOGGER.info("{} complete (resultUuid='{}')", getComputationType(), resultContext.getResultUuid());
-                    }
-                });
-            } catch (CancellationException e) {
-                // Do nothing
-            } catch (Exception e) {
-                resultService.delete(resultContext.getResultUuid());
-                this.handleNonCancellationException(resultContext, e, rootReporter);
-                throw new ComputationRunException(PowsyblWsProblemDetail.fromException(e, serverNameProvider.serverName()).toString(), e);
-            } finally {
-                if (Boolean.TRUE.equals(resultContext.getRunContext().getDebug())) {
-                    processDebug(resultContext);
+                    LOGGER.info("Stored in {}s", TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime));
+
+                    sendResultMessage(resultContext, result);
+                    LOGGER.info("{} complete (resultUuid='{}')", getComputationType(), resultContext.getResultUuid());
                 }
-                clean(resultContext);
+            });
+        } catch (CancellationException e) {
+            // Do nothing
+        } catch (Exception e) {
+            resultService.delete(resultContext.getResultUuid());
+            this.handleNonCancellationException(resultContext, e, rootReporter);
+            throw new ComputationRunException(PowsyblWsProblemDetail.fromException(e, serverNameProvider.serverName()).toString(), e);
+        } finally {
+            if (Boolean.TRUE.equals(resultContext.getRunContext().getDebug())) {
+                processDebug(resultContext);
             }
-        };
+            clean(resultContext);
+        }
     }
 
     /**
