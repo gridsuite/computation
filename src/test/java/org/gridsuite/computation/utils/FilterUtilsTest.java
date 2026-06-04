@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -33,21 +34,12 @@ class FilterUtilsTest {
         assertTrue(resourceFilterDTOList.isEmpty());
 
         resourceFilterDTOList = List.of(new ResourceFilterDTO(ResourceFilterDTO.DataType.TEXT, ResourceFilterDTO.Type.CONTAINS, "abc", "ID"),
-                                        new ResourceFilterDTO(ResourceFilterDTO.DataType.NUMBER, ResourceFilterDTO.Type.EQUALS, 100., "activePower", 0.1));
+                                        new ResourceFilterDTO(ResourceFilterDTO.DataType.NUMBER, ResourceFilterDTO.Type.EQUALS, 100., "activePower", 0.1),
+                                        new ResourceFilterDTO(ResourceFilterDTO.DataType.BOOLEAN, ResourceFilterDTO.Type.EQUALS, true, "isWorstSide"));
         List<ResourceFilterDTO> actualResourceFilterDTOList = FilterUtils.fromStringFiltersToDTO(objectMapper.writeValueAsString(resourceFilterDTOList), objectMapper);
 
-        assertEquals(2, actualResourceFilterDTOList.size());
-        assertEquals(ResourceFilterDTO.DataType.TEXT, actualResourceFilterDTOList.getFirst().dataType());
-        assertEquals(ResourceFilterDTO.Type.CONTAINS, actualResourceFilterDTOList.getFirst().type());
-        assertEquals("abc", actualResourceFilterDTOList.getFirst().value());
-        assertEquals("ID", actualResourceFilterDTOList.getFirst().column());
-        assertNull(actualResourceFilterDTOList.get(0).tolerance());
-
-        assertEquals(ResourceFilterDTO.DataType.NUMBER, actualResourceFilterDTOList.get(1).dataType());
-        assertEquals(ResourceFilterDTO.Type.EQUALS, actualResourceFilterDTOList.get(1).type());
-        assertEquals(100., actualResourceFilterDTOList.get(1).value());
-        assertEquals("activePower", actualResourceFilterDTOList.get(1).column());
-        assertEquals(0.1, actualResourceFilterDTOList.get(1).tolerance());
+        assertEquals(3, actualResourceFilterDTOList.size());
+        assertThat(actualResourceFilterDTOList).usingRecursiveComparison().isEqualTo(resourceFilterDTOList);
     }
 
     @Test
