@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * @author Kevin LE SAULNIER <kevin.lesaulnier@rte-france.com>
+ * @author Kevin LE SAULNIER <kevin.lesaulnier at rte-france.com>
  */
 @NoArgsConstructor
 public abstract class AbstractCommonSpecificationBuilder<T> {

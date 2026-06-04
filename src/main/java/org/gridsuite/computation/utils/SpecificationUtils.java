@@ -23,7 +23,7 @@ import static org.springframework.data.jpa.domain.Specification.not;
 /**
  * Utility class to create Spring Data JPA Specification (Spring interface for JPA Criteria API).
  *
- * @author Kevin Le Saulnier <kevin.lesaulnier@rte-france.com>
+ * @author Kevin Le Saulnier <kevin.lesaulnier at rte-france.com>
  */
 public final class SpecificationUtils {
 
@@ -65,11 +65,13 @@ public final class SpecificationUtils {
     }
 
     public static <X> Specification<X> contains(String field, String value) {
-        return (root, cq, cb) -> cb.like(cb.upper(getColumnPath(root, field).as(String.class)), "%" + EscapeCharacter.DEFAULT.escape(value).toUpperCase() + "%", EscapeCharacter.DEFAULT.getEscapeCharacter());
+        return (root, cq, cb) -> cb.like(cb.upper(getColumnPath(root, field).as(String.class)), "%" + EscapeCharacter.DEFAULT.escape(value).toUpperCase() + "%",
+                EscapeCharacter.DEFAULT.getEscapeCharacter());
     }
 
     public static <X> Specification<X> startsWith(String field, String value) {
-        return (root, cq, cb) -> cb.like(cb.upper(getColumnPath(root, field).as(String.class)), EscapeCharacter.DEFAULT.escape(value).toUpperCase() + "%", EscapeCharacter.DEFAULT.getEscapeCharacter());
+        return (root, cq, cb) -> cb.like(cb.upper(getColumnPath(root, field).as(String.class)), EscapeCharacter.DEFAULT.escape(value).toUpperCase() + "%",
+                EscapeCharacter.DEFAULT.getEscapeCharacter());
     }
 
     /**

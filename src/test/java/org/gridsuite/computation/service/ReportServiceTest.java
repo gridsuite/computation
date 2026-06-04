@@ -26,7 +26,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * @author Mathieu Deharbe <mathieu.deharbe_externe at rte-france.com
+ * @author Mathieu Deharbe <mathieu.deharbe_externe at rte-france.com>
  */
 @RestClientTest(ReportService.class)
 @ContextConfiguration(classes = {ComputationConfig.class, ReportService.class})
