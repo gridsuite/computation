@@ -397,6 +397,11 @@ class ComputationTest implements WithAssertions {
 
         assertThat(statuses).containsExactlyInAnyOrderEntriesOf(Map.of(firstResultUuid, MockComputationStatus.RUNNING, secondResultUuid, MockComputationStatus.COMPLETED));
         verify(resultService).findStatuses(List.of(firstResultUuid, secondResultUuid));
+
+        UUID nonExistingResultUuid = UUID.randomUUID();
+        statuses = computationService.getStatuses(List.of(firstResultUuid, secondResultUuid, nonExistingResultUuid));
+        assertThat(statuses).containsExactlyInAnyOrderEntriesOf(Map.of(firstResultUuid, MockComputationStatus.RUNNING, secondResultUuid, MockComputationStatus.COMPLETED));
+        verify(resultService).findStatuses(List.of(firstResultUuid, secondResultUuid, nonExistingResultUuid));
     }
 
     @Test
