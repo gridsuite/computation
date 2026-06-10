@@ -9,7 +9,6 @@ package org.gridsuite.computation.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.powsybl.commons.PowsyblException;
 import lombok.Getter;
-
 import org.gridsuite.computation.s3.ComputationS3Service;
 import org.gridsuite.computation.s3.S3InputStreamInfos;
 import org.springframework.core.io.InputStreamResource;
@@ -100,7 +99,7 @@ public abstract class AbstractComputationService<C extends AbstractComputationRu
     }
 
     public S getStatus(UUID resultUuid) {
-        return getStatuses(List.of(resultUuid)).get(resultUuid);
+        return resultService.findStatus(resultUuid);
     }
 
     public Map<UUID, S> getStatuses(List<UUID> resultUuids) {
