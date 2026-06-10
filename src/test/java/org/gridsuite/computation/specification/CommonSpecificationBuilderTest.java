@@ -18,8 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.gridsuite.computation.dto.ResourceFilterDTO.DataType.NUMBER;
-import static org.gridsuite.computation.dto.ResourceFilterDTO.DataType.TEXT;
+import static org.gridsuite.computation.dto.ResourceFilterDTO.DataType.*;
 import static org.gridsuite.computation.dto.ResourceFilterDTO.Type.*;
 import static org.gridsuite.computation.utils.SpecificationUtils.MAX_IN_CLAUSE_SIZE;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -89,7 +88,9 @@ class CommonSpecificationBuilderTest {
                 new ResourceFilterDTO(NUMBER, LESS_THAN_OR_EQUAL, 100.0157, "dummyNumberColumn"),
                 new ResourceFilterDTO(NUMBER, GREATER_THAN_OR_EQUAL, 10, "dummyNumberColumn", 0.1),
                 new ResourceFilterDTO(NUMBER, NOT_EQUAL, 10, "parent.dummyNumberColumn"),
-                new ResourceFilterDTO(NUMBER, EQUALS, 42.000, "dummyNumberColumn")
+                new ResourceFilterDTO(NUMBER, EQUALS, 42.000, "dummyNumberColumn"),
+                new ResourceFilterDTO(BOOLEAN, EQUALS, true, "dummyBooleanColumn"),
+                new ResourceFilterDTO(BOOLEAN, NOT_EQUAL, false, "dummyBooleanColumn")
         );
         List<ResourceFilterDTO> resourceFiltersWithChildren = List.of(
                 new ResourceFilterDTO(NUMBER, NOT_EQUAL, 10, "parent.dummyNumberColumn")
@@ -134,10 +135,15 @@ class CommonSpecificationBuilderTest {
                 new ResourceFilterDTO(NUMBER, IN, 1, "dummyColumn")
         );
         assertThrows(IllegalArgumentException.class, () -> builder.buildSpecification(resultUuid, numResourceFilters));
+
+        List<ResourceFilterDTO> booleanResourceFilters = List.of(
+                new ResourceFilterDTO(BOOLEAN, CONTAINS, true, "dummyColumn")
+        );
+        assertThrows(IllegalArgumentException.class, () -> builder.buildSpecification(resultUuid, booleanResourceFilters));
     }
 
     // test specific dummy implementation
-    private static class CommonSpecificationBuilderTestImpl extends AbstractCommonSpecificationBuilder<Object> {
+    private static final class CommonSpecificationBuilderTestImpl extends AbstractCommonSpecificationBuilder<Object> {
 
         @Override
         public boolean isNotParentFilter(ResourceFilterDTO filter) {

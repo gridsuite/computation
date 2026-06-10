@@ -14,7 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * @author Anis Touri <anis.touri at rte-france.com
+ * @author Anis Touri <anis.touri at rte-france.com>
  */
 @Component
 public class PostCompletionAdapter implements TransactionSynchronization {

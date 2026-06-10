@@ -101,5 +101,3 @@ public abstract class AbstractFilterService extends AbstractGlobalFilterService 
     }
 }
 
-
-
