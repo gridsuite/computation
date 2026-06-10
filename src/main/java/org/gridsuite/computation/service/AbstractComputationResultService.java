@@ -22,9 +22,7 @@ public abstract class AbstractComputationResultService<S> {
 
     public abstract void deleteAll();
 
-    public S findStatus(UUID resultUuid) {
-        return findStatuses(List.of(resultUuid)).get(resultUuid);
-    }
+    public abstract S findStatus(UUID resultUuid);
 
     public abstract Map<UUID, S> findStatuses(List<UUID> resultUuids);
 
