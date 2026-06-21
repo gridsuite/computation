@@ -48,6 +48,8 @@ public class NotificationService {
     public static final String HEADER_USER_ID = "userId";
     public static final String HEADER_DEBUG = "debug";
     public static final String HEADER_ERROR_MESSAGE = "errorMessage";
+    public static final String HEADER_PROGRESS_CURRENT = "progressCurrent";
+    public static final String HEADER_PROGRESS_TOTAL = "progressTotal";
 
     public static final String SENDING_MESSAGE = "Sending message : {}";
 
@@ -118,6 +120,18 @@ public class NotificationService {
                 .build();
         CANCEL_FAILED_MESSAGE_LOGGER.info(SENDING_MESSAGE, message);
         publisher.send(publishPrefix + "CancelFailed-out-0", message);
+    }
+
+    public void sendProgressMessage(UUID resultUuid, String receiver, String userId, int current, int total) {
+        Message<String> message = MessageBuilder
+                .withPayload("")
+                .setHeader(HEADER_RESULT_UUID, resultUuid.toString())
+                .setHeader(HEADER_RECEIVER, receiver)
+                .setHeader(HEADER_USER_ID, userId)
+                .setHeader(HEADER_PROGRESS_CURRENT, current)
+                .setHeader(HEADER_PROGRESS_TOTAL, total)
+                .build();
+        publisher.send(publishPrefix + "Progress-out-0", message);
     }
 
     public static String getCancelMessage(String computationLabel) {
