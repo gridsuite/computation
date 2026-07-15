@@ -8,6 +8,7 @@ package org.gridsuite.computation.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import org.gridsuite.computation.utils.annotations.PostCompletion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +53,8 @@ public class NotificationService {
     public static final String SENDING_MESSAGE = "Sending message : {}";
 
     @Getter private final StreamBridge publisher;
-    @Getter private final String publishPrefix;
+    @Getter @Setter
+    private String publishPrefix;
 
     @Autowired
     public NotificationService(StreamBridge publisher) {
