@@ -42,8 +42,12 @@
     </developers>
 
     <properties>
-        <powsybl-ws-dependencies.version>2.33.0</powsybl-ws-dependencies.version>
-        <gridsuite-filter.version>1.28.0</gridsuite-filter.version>
+        <!-- FIXME to remove when powsybl-parent supports JDK25 -->
+        <java.version>25</java.version>
+        <maven.jacoco.version>0.8.15</maven.jacoco.version>
+        <checkstyle.version>13.8.0</checkstyle.version>
+        <powsybl-ws-dependencies.version>2.34.0</powsybl-ws-dependencies.version>
+        <gridsuite-filter.version>1.29.0</gridsuite-filter.version>
         <org.hamcrest.version>2.2</org.hamcrest.version>
         <spring-cloud-aws.version>3.4.2</spring-cloud-aws.version>
         <sonar.organization>gridsuite</sonar.organization>
