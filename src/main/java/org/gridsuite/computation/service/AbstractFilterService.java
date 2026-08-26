@@ -17,12 +17,11 @@ import org.gridsuite.computation.dto.ResourceFilterDTO;
 import org.gridsuite.filter.AbstractFilter;
 import org.gridsuite.filter.globalfilter.AbstractGlobalFilterService;
 import org.gridsuite.filter.utils.EquipmentType;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -39,14 +38,14 @@ public abstract class AbstractFilterService extends AbstractGlobalFilterService 
     protected static final String FILTER_API_VERSION = "v1";
     protected static final String DELIMITER = "/";
 
-    protected final RestTemplate restTemplate;
+    protected final RestClient restClient;
     protected final NetworkStoreService networkStoreService;
     protected final String filterServerBaseUri;
 
     public static final String IDS = "ids";
 
-    protected AbstractFilterService(RestTemplateBuilder restTemplateBuilder, NetworkStoreService networkStoreService, String filterServerBaseUri) {
-        this.restTemplate = restTemplateBuilder.build();
+    protected AbstractFilterService(RestClient.Builder restClientBuilder, NetworkStoreService networkStoreService, String filterServerBaseUri) {
+        this.restClient = restClientBuilder.defaultStatusHandler(new DefaultResponseErrorHandler()).build();
         this.networkStoreService = networkStoreService;
         this.filterServerBaseUri = filterServerBaseUri;
     }
@@ -68,12 +67,11 @@ public abstract class AbstractFilterService extends AbstractGlobalFilterService 
                 .toUriString();
 
         try {
-            return restTemplate.exchange(
-                    filterServerBaseUri + path,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<List<AbstractFilter>>() { }
-            ).getBody();
+            return restClient.get()
+                    .uri(filterServerBaseUri + path)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {
+                    });
         } catch (HttpStatusCodeException e) {
             throw new PowsyblException(FILTERS_NOT_FOUND + " [" + filtersUuids + "]");
         }
@@ -100,4 +98,3 @@ public abstract class AbstractFilterService extends AbstractGlobalFilterService 
                 : Optional.of(new ResourceFilterDTO(ResourceFilterDTO.DataType.TEXT, ResourceFilterDTO.Type.IN, subjectIds, columnName));
     }
 }
-
