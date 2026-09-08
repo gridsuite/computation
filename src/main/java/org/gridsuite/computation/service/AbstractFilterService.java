@@ -19,7 +19,6 @@ import org.gridsuite.filter.globalfilter.AbstractGlobalFilterService;
 import org.gridsuite.filter.utils.EquipmentType;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.server.ResponseStatusException;
@@ -45,7 +44,7 @@ public abstract class AbstractFilterService extends AbstractGlobalFilterService 
     public static final String IDS = "ids";
 
     protected AbstractFilterService(RestClient.Builder restClientBuilder, NetworkStoreService networkStoreService, String filterServerBaseUri) {
-        this.restClient = restClientBuilder.defaultStatusHandler(new DefaultResponseErrorHandler()).build();
+        this.restClient = restClientBuilder.build();
         this.networkStoreService = networkStoreService;
         this.filterServerBaseUri = filterServerBaseUri;
     }

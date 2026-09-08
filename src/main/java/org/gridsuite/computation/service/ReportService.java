@@ -16,7 +16,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -44,7 +43,7 @@ public class ReportService {
                          RestClient.Builder restClientBuilder) {
         this.reportServerBaseUri = reportServerBaseUri;
         this.objectMapper = objectMapper;
-        this.restClient = restClientBuilder.defaultStatusHandler(new DefaultResponseErrorHandler()).build();
+        this.restClient = restClientBuilder.build();
     }
 
     private String getReportServerURI() {
