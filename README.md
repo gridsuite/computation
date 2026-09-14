@@ -14,7 +14,7 @@ It provides the following capabilities:
 - **Asynchronous run/cancel pipeline** using Spring Cloud Stream: any computation server can publish and consume run/cancel/result messages out-of-the-box.
 - **Transactional notification safety** via the `@PostCompletion` annotation, guaranteeing that result messages are only sent after the database transaction has committed.
 - **Flexible result filtering** with a JPA Criteria API layer (`SpecificationUtils`, `AbstractCommonSpecificationBuilder`) supporting text, numeric, and IN-clause filters with sorting and pagination.
-- **Network equipment filtering** bridging the `filter-server` REST API to runtime `Network` objects (nominal voltage, country codes, substation properties, expert filters).
+- **Network equipment filtering** bridging the `filter-server` REST API to runtime `Network` objects (nominal voltage, country codes, substation properties, filters).
 - **Optional S3 debug support**: computation workers can archive their working directories to AWS S3 for post-mortem analysis.
 - **Micrometer observability** tracking computation count and concurrency by provider, type, and status.
 
