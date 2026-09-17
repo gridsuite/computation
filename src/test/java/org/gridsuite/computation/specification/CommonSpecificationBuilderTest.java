@@ -47,7 +47,7 @@ class CommonSpecificationBuilderTest {
 
         // Configure mocks' behavior
         when(root.get(anyString())).thenReturn(path);
-        when(cb.equal(any(Path.class), any(UUID.class))).thenReturn(Mockito.mock(Predicate.class));
+        when(cb.between(any(Path.class), any(UUID.class), any(UUID.class))).thenReturn(Mockito.mock(Predicate.class));
         when(path.get(anyString())).thenReturn(path);
         when(path.as(String.class)).thenReturn(exprString);
         when(path.as(Double.class)).thenReturn(exprDouble);
