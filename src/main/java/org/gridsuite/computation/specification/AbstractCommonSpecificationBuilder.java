@@ -23,7 +23,7 @@ import java.util.UUID;
 public abstract class AbstractCommonSpecificationBuilder<T> {
 
     public Specification<T> resultUuidEquals(UUID value) {
-        return (root, cq, cb) -> cb.equal(getResultIdPath(root), value);
+        return (root, cq, cb) -> cb.between(getResultIdPath(root), value, value);
     }
 
     public Specification<T> uuidIn(List<UUID> uuids) {
