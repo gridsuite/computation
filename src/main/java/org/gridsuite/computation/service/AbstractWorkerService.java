@@ -334,7 +334,7 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
 
         preRun(runContext);
         setRunningStatus(resultUuid);
-        notificationService.sendPreloadingFinishedMessage(resultUuid, runContext.getReceiver(), runContext.getUserId(), null);
+        notificationService.sendRunningMessage(resultUuid, runContext.getReceiver(), runContext.getUserId(), null);
 
         CompletableFuture<R> future = runAsync(runContext, provider, resultUuid);
         R result = future == null ? null : observer.observeRun("run", runContext, future::join);
