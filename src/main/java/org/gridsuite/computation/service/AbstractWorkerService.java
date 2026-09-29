@@ -263,9 +263,15 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
     protected void handleNonCancellationException(AbstractResultContext<C> resultContext, Exception exception, AtomicReference<ReportNode> rootReporter) {
     }
 
+    protected void canBeCancelled(UUID resultUuid) {
+    }
+
     public Consumer<Message<String>> consumeCancel() {
         return message -> {
             CancelContext cancelContext = CancelContext.fromMessage(message);
+            if (cancelContext.resultUuid() != null) {
+                canBeCancelled(cancelContext.resultUuid());
+            }
             boolean isCancelled = cancelAsync(cancelContext);
             if (!isCancelled) {
                 notificationService.publishCancelFailed(cancelContext.resultUuid(), cancelContext.receiver(), getComputationType(), cancelContext.userId());
@@ -333,8 +339,10 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
         runContext.setReportNode(reportNode);
 
         preRun(runContext);
-        setRunningStatus(resultUuid);
-        notificationService.sendRunningMessage(resultUuid, runContext.getReceiver(), runContext.getUserId(), null);
+        if (resultUuid != null) {
+            setRunningStatus(resultUuid);
+            notificationService.sendRunningMessage(resultUuid, runContext.getReceiver(), runContext.getUserId(), null);
+        }
 
         CompletableFuture<R> future = runAsync(runContext, provider, resultUuid);
         R result = future == null ? null : observer.observeRun("run", runContext, future::join);
