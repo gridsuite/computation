@@ -263,16 +263,14 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
     protected void handleNonCancellationException(AbstractResultContext<C> resultContext, Exception exception, AtomicReference<ReportNode> rootReporter) {
     }
 
-    protected void canBeCancelled(UUID resultUuid) {
+    protected boolean canBeCancelled(UUID resultUuid) {
+        return true;
     }
 
     public Consumer<Message<String>> consumeCancel() {
         return message -> {
             CancelContext cancelContext = CancelContext.fromMessage(message);
-            if (cancelContext.resultUuid() != null) {
-                canBeCancelled(cancelContext.resultUuid());
-            }
-            boolean isCancelled = cancelAsync(cancelContext);
+            boolean isCancelled = canBeCancelled(cancelContext.resultUuid()) && cancelAsync(cancelContext);
             if (!isCancelled) {
                 notificationService.publishCancelFailed(cancelContext.resultUuid(), cancelContext.receiver(), getComputationType(), cancelContext.userId());
             }
