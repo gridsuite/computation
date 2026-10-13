@@ -61,6 +61,8 @@ import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.gridsuite.computation.s3.ComputationS3Service.S3_DELIMITER;
 import static org.gridsuite.computation.s3.ComputationS3Service.S3_SERVICE_NOT_AVAILABLE_MESSAGE;
@@ -129,6 +131,13 @@ class ComputationTest implements WithAssertions {
         @Override
         public MockComputationStatus findStatus(UUID resultUuid) {
             return mockDBStatus.get(resultUuid);
+        }
+
+        @Override
+        public Map<UUID, MockComputationStatus> findStatuses(List<UUID> resultUuids) {
+            return resultUuids.stream()
+                    .filter(mockDBStatus::containsKey)
+                    .collect(Collectors.toMap(Function.identity(), mockDBStatus::get));
         }
     }
 
@@ -375,6 +384,31 @@ class ComputationTest implements WithAssertions {
         workerService.consumeCancel().accept(message);
         assertNotNull(resultService.findStatus(RESULT_UUID));
         verify(notificationService.getPublisher(), times(1)).send(eq("publishCancelFailed-out-0"), isA(Message.class));
+    }
+
+    @Test
+    void testGetStatuses() {
+        UUID firstResultUuid = UUID.randomUUID();
+        UUID secondResultUuid = UUID.randomUUID();
+        computationService.setStatus(List.of(firstResultUuid), MockComputationStatus.RUNNING);
+        computationService.setStatus(List.of(secondResultUuid), MockComputationStatus.COMPLETED);
+
+        Map<UUID, MockComputationStatus> statuses = computationService.getStatuses(List.of(firstResultUuid, secondResultUuid));
+
+        assertThat(statuses).containsExactlyInAnyOrderEntriesOf(Map.of(firstResultUuid, MockComputationStatus.RUNNING, secondResultUuid, MockComputationStatus.COMPLETED));
+        verify(resultService).findStatuses(List.of(firstResultUuid, secondResultUuid));
+
+        UUID nonExistingResultUuid = UUID.randomUUID();
+        statuses = computationService.getStatuses(List.of(firstResultUuid, secondResultUuid, nonExistingResultUuid));
+        assertThat(statuses).containsExactlyInAnyOrderEntriesOf(Map.of(firstResultUuid, MockComputationStatus.RUNNING, secondResultUuid, MockComputationStatus.COMPLETED));
+        verify(resultService).findStatuses(List.of(firstResultUuid, secondResultUuid, nonExistingResultUuid));
+    }
+
+    @Test
+    void testGetStatusesWithNoResultUuids() {
+        List<UUID> emptyResultUuids = List.of();
+        assertThat(computationService.getStatuses(emptyResultUuids)).isEmpty();
+        assertThat(computationService.getStatuses(null)).isEmpty();
     }
 
     @Test
