@@ -12,7 +12,7 @@ import org.gridsuite.computation.ComputationConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
+import org.springframework.boot.restclient.test.autoconfigure.RestClientTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -90,4 +90,3 @@ class ReportServiceTest {
         assertThatThrownBy(() -> reportService.deleteReport(REPORT_ERROR_UUID)).isInstanceOf(RestClientException.class);
     }
 }
-

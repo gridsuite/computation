@@ -46,10 +46,10 @@
         <java.version>25</java.version>
         <maven.jacoco.version>0.8.15</maven.jacoco.version>
         <checkstyle.version>13.8.0</checkstyle.version>
-        <powsybl-ws-dependencies.version>2.34.0</powsybl-ws-dependencies.version>
+        <powsybl-ws-dependencies.version>2.35.0-SNAPSHOT</powsybl-ws-dependencies.version>
         <gridsuite-filter.version>1.29.0</gridsuite-filter.version>
         <org.hamcrest.version>2.2</org.hamcrest.version>
-        <spring-cloud-aws.version>3.4.2</spring-cloud-aws.version>
+        <spring-cloud-aws.version>4.0.0</spring-cloud-aws.version>
         <sonar.organization>gridsuite</sonar.organization>
         <sonar.projectKey>org.gridsuite:computation</sonar.projectKey>
         <aws-sdk.version>2.29.52</aws-sdk.version>
@@ -130,6 +130,10 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-jackson2</artifactId>
         </dependency>
 
         <!-- Jakarta APIs -->
@@ -273,6 +277,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-test-autoconfigure</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-restclient-test</artifactId>
             <scope>test</scope>
         </dependency>
 
