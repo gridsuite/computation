@@ -13,7 +13,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @author Anis Touri <anis.touri at rte-france.com
+ * @author Anis Touri <anis.touri at rte-france.com>
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

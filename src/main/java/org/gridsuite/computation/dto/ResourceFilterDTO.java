@@ -29,6 +29,8 @@ public record ResourceFilterDTO(@NotNull DataType dataType, @NotNull Type type, 
         TEXT,
         @JsonProperty("number")
         NUMBER,
+        @JsonProperty("boolean")
+        BOOLEAN,
     }
 
     public enum Type {

@@ -1,2 +1,3 @@
 # AutoConfigureCache auto-configuration imports
 org.gridsuite.computation.s3.S3AutoConfiguration
+org.gridsuite.computation.rabbitmq.RabbitConsumerAutoConfiguration

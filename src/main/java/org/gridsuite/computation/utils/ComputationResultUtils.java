@@ -6,18 +6,21 @@
  */
 package org.gridsuite.computation.utils;
 
+import com.powsybl.contingency.violations.BusBreakerViolationLocation;
+import com.powsybl.contingency.violations.LimitViolation;
+import com.powsybl.contingency.violations.NodeBreakerViolationLocation;
+import com.powsybl.contingency.violations.ViolationLocation;
 import com.powsybl.iidm.network.*;
-import com.powsybl.security.BusBreakerViolationLocation;
-import com.powsybl.security.LimitViolation;
-import com.powsybl.security.NodeBreakerViolationLocation;
-import com.powsybl.security.ViolationLocation;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.powsybl.contingency.violations.LimitViolationType.HIGH_VOLTAGE;
+import static com.powsybl.contingency.violations.LimitViolationType.HIGH_VOLTAGE_ANGLE;
+import static com.powsybl.contingency.violations.LimitViolationType.LOW_VOLTAGE;
+import static com.powsybl.contingency.violations.LimitViolationType.LOW_VOLTAGE_ANGLE;
+import static com.powsybl.contingency.violations.ViolationLocation.Type.NODE_BREAKER;
 import static com.powsybl.iidm.network.IdentifiableType.BUSBAR_SECTION;
-import static com.powsybl.security.LimitViolationType.*;
-import static com.powsybl.security.ViolationLocation.Type.NODE_BREAKER;
 
 /**
  * @author Jamal KHEYYAD <jamal.kheyyad at rte-international.com>

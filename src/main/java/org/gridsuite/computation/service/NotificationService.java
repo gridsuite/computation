@@ -8,6 +8,7 @@ package org.gridsuite.computation.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import org.gridsuite.computation.utils.annotations.PostCompletion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * @author Etienne Homer <etienne.homer at rte-france.com
+ * @author Etienne Homer <etienne.homer at rte-france.com>
  */
 @AllArgsConstructor
 @Service
@@ -31,6 +32,7 @@ public class NotificationService {
     private static final String RUN_CATEGORY_BROKER_OUTPUT = NotificationService.class.getName() + ".output-broker-messages.run";
     private static final String STOP_CATEGORY_BROKER_OUTPUT = NotificationService.class.getName() + ".output-broker-messages.stop";
     private static final String RESULT_CATEGORY_BROKER_OUTPUT = NotificationService.class.getName() + ".output-broker-messages.result";
+    private static final String RUNNING_CATEGORY_BROKER_OUTPUT = NotificationService.class.getName() + ".output-broker-messages.running";
     private static final String FAILED_CATEGORY_BROKER_OUTPUT = NotificationService.class.getName() + ".output-broker-messages.failed";
     private static final String CANCEL_FAILED_CATEGORY_BROKER_OUTPUT = NotificationService.class.getName() + ".output-broker-messages.cancel-failed";
 
@@ -38,6 +40,7 @@ public class NotificationService {
     private static final Logger CANCEL_MESSAGE_LOGGER = LoggerFactory.getLogger(CANCEL_CATEGORY_BROKER_OUTPUT);
     private static final Logger STOP_MESSAGE_LOGGER = LoggerFactory.getLogger(STOP_CATEGORY_BROKER_OUTPUT);
     private static final Logger RESULT_MESSAGE_LOGGER = LoggerFactory.getLogger(RESULT_CATEGORY_BROKER_OUTPUT);
+    private static final Logger RUNNING_MESSAGE_LOGGER = LoggerFactory.getLogger(RUNNING_CATEGORY_BROKER_OUTPUT);
     private static final Logger FAILED_MESSAGE_LOGGER = LoggerFactory.getLogger(FAILED_CATEGORY_BROKER_OUTPUT);
     private static final Logger CANCEL_FAILED_MESSAGE_LOGGER = LoggerFactory.getLogger(CANCEL_FAILED_CATEGORY_BROKER_OUTPUT);
 
@@ -54,7 +57,8 @@ public class NotificationService {
     public static final String SENDING_MESSAGE = "Sending message : {}";
 
     @Getter private final StreamBridge publisher;
-    @Getter private final String publishPrefix;
+    @Getter @Setter
+    private String publishPrefix;
 
     @Autowired
     public NotificationService(StreamBridge publisher) {
@@ -95,6 +99,19 @@ public class NotificationService {
         Message<String> message = builder.build();
         RESULT_MESSAGE_LOGGER.debug(SENDING_MESSAGE, message);
         publisher.send(publishPrefix + "Result-out-0", message);
+    }
+
+    @PostCompletion
+    public void sendRunningMessage(UUID resultUuid, String receiver, String userId, @Nullable Map<String, Object> additionalHeaders) {
+        MessageBuilder<String> builder = MessageBuilder
+                .withPayload("")
+                .setHeader(HEADER_RESULT_UUID, resultUuid.toString())
+                .setHeader(HEADER_RECEIVER, receiver)
+                .setHeader(HEADER_USER_ID, userId)
+                .copyHeaders(additionalHeaders);
+        Message<String> message = builder.build();
+        RUNNING_MESSAGE_LOGGER.debug(SENDING_MESSAGE, message);
+        publisher.send(publishPrefix + "Running-out-0", message);
     }
 
     @PostCompletion

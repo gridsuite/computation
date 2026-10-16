@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * @author Kevin LE SAULNIER <kevin.lesaulnier@rte-france.com>
+ * @author Kevin LE SAULNIER <kevin.lesaulnier at rte-france.com>
  */
 @NoArgsConstructor
 public abstract class AbstractCommonSpecificationBuilder<T> {
@@ -38,7 +38,7 @@ public abstract class AbstractCommonSpecificationBuilder<T> {
     public Specification<T> buildSpecification(UUID resultUuid, List<ResourceFilterDTO> resourceFilters, boolean distinct) {
         List<ResourceFilterDTO> childrenFilters = resourceFilters != null ? resourceFilters.stream().filter(this::isNotParentFilter).toList() : List.of();
         // filter by resultUuid
-        Specification<T> specification = Specification.where(resultUuidEquals(resultUuid));
+        Specification<T> specification = resultUuidEquals(resultUuid);
         if (distinct) {
             specification = specification.and(SpecificationUtils.distinct());
         }
@@ -64,7 +64,7 @@ public abstract class AbstractCommonSpecificationBuilder<T> {
 
     public Specification<T> buildLimitViolationsSpecification(List<UUID> uuids, List<ResourceFilterDTO> resourceFilters) {
         List<ResourceFilterDTO> childrenFilters = resourceFilters.stream().filter(this::isNotParentFilter).toList();
-        Specification<T> specification = Specification.where(uuidIn(uuids));
+        Specification<T> specification = uuidIn(uuids);
 
         return SpecificationUtils.appendFiltersToSpecification(specification, childrenFilters);
     }

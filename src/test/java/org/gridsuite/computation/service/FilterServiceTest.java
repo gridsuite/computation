@@ -15,30 +15,26 @@ import com.powsybl.network.store.client.PreloadingStrategy;
 import org.gridsuite.computation.dto.GlobalFilter;
 import org.gridsuite.computation.dto.ResourceFilterDTO;
 import org.gridsuite.filter.AbstractFilter;
+import org.gridsuite.filter.identifierlistfilter.IdentifierListFilter;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.test.web.client.match.MockRestRequestMatchers;
+import org.springframework.test.web.client.response.MockRestResponseCreators;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 /**
@@ -51,58 +47,67 @@ class FilterServiceTest {
     private NetworkStoreService networkStoreService;
 
     @Mock
-    private RestTemplate restTemplate;
-
-    @Mock
     private Network network;
 
     @Mock
     private VariantManager variantManager;
 
-    @Mock
-    private AbstractFilterService filterService;
+    private MockRestServiceServer server;
+    private TestFilterService filterService;
 
     private static final String FILTER_SERVER_BASE_URI = "http://localhost:8080";
     private static final String VARIANT_ID = "testVariant";
     private static final UUID NETWORK_UUID = UUID.randomUUID();
     private static final UUID FILTER_UUID = UUID.randomUUID();
+    private static final List<String> FILTERED_SUBJECT_ID = List.of("FILTERED_ID_1", "FILTERED_ID_2", "FILTERED_ID_3");
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(filterService, "restTemplate", restTemplate);
-        ReflectionTestUtils.setField(filterService, "filterServerBaseUri", FILTER_SERVER_BASE_URI);
-        ReflectionTestUtils.setField(filterService, "networkStoreService", networkStoreService);
+        RestClient.Builder restClientBuilder = RestClient.builder();
+        server = MockRestServiceServer.bindTo(restClientBuilder).build();
+        filterService = new TestFilterService(FILTERED_SUBJECT_ID, restClientBuilder, networkStoreService, FILTER_SERVER_BASE_URI);
+    }
+
+    @AfterEach
+    void tearDown() {
+        server.verify();
     }
 
     @Test
     void shouldReturnEmptyListWhenFiltersUuidsIsEmpty() {
-        when(filterService.getFilters(anyList())).thenCallRealMethod();
-        List<UUID> emptyList = Collections.emptyList();
-        List<AbstractFilter> result = filterService.getFilters(emptyList);
+        List<AbstractFilter> result = filterService.getFilters(List.of());
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
 
     @Test
-    void shouldCallRestTemplateAndReturnFilters() {
-        when(filterService.getFilters(anyList())).thenCallRealMethod();
+    void shouldCallRestClientAndReturnFilters() {
         List<UUID> filterUuids = List.of(FILTER_UUID);
-        List<AbstractFilter> expectedFilters = Collections.singletonList(mock(AbstractFilter.class));
-        ResponseEntity<List<AbstractFilter>> responseEntity = new ResponseEntity<>(expectedFilters, HttpStatus.OK);
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(), any(ParameterizedTypeReference.class))).thenReturn(responseEntity);
+
+        server.expect(MockRestRequestMatchers.requestTo(FILTER_SERVER_BASE_URI + "/v1/filters/metadata?ids=" + FILTER_UUID))
+                .andRespond(MockRestResponseCreators.withSuccess("""
+                    [{
+                        "type": "IDENTIFIER_LIST",
+                        "id": "%s",
+                        "equipmentType": "LINE",
+                        "filterEquipmentsAttributes": []
+                    }]
+                    """.formatted(FILTER_UUID), MediaType.APPLICATION_JSON));
+
         List<AbstractFilter> result = filterService.getFilters(filterUuids);
-        assertEquals(expectedFilters, result);
-        verify(restTemplate).exchange(contains("v1/filters/metadata"), eq(HttpMethod.GET), isNull(), any(ParameterizedTypeReference.class)
-        );
+
+        assertEquals(1, result.size());
+        assertInstanceOf(IdentifierListFilter.class, result.getFirst());
+        assertEquals(FILTER_UUID, result.getFirst().getId());
     }
 
     @Test
     void shouldThrowPowsyblExceptionWhenHttpError() {
-        when(filterService.getFilters(anyList())).thenCallRealMethod();
         List<UUID> filterUuids = List.of(FILTER_UUID);
-        HttpStatusCodeException httpException = mock(HttpStatusCodeException.class);
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(), any(ParameterizedTypeReference.class)
-        )).thenThrow(httpException);
+
+        server.expect(MockRestRequestMatchers.requestTo(FILTER_SERVER_BASE_URI + "/v1/filters/metadata?ids=" + FILTER_UUID))
+                .andRespond(MockRestResponseCreators.withServerError());
+
         PowsyblException exception = assertThrows(PowsyblException.class, () -> filterService.getFilters(filterUuids));
         assertTrue(exception.getMessage().contains("Filters not found"));
         assertTrue(exception.getMessage().contains(FILTER_UUID.toString()));
@@ -110,7 +115,6 @@ class FilterServiceTest {
 
     @Test
     void shouldReturnNetworkWhenSuccessful() {
-        when(filterService.getNetwork(any(), any())).thenCallRealMethod();
         when(networkStoreService.getNetwork(NETWORK_UUID, PreloadingStrategy.COLLECTION)).thenReturn(network);
         when(network.getVariantManager()).thenReturn(variantManager);
         Network result = filterService.getNetwork(NETWORK_UUID, VARIANT_ID);
@@ -120,7 +124,6 @@ class FilterServiceTest {
 
     @Test
     void shouldThrowResponseStatusExceptionWhenPowsyblException() {
-        when(filterService.getNetwork(any(), any())).thenCallRealMethod();
         PowsyblException powsyblException = new PowsyblException("Network not found");
         when(networkStoreService.getNetwork(NETWORK_UUID, PreloadingStrategy.COLLECTION)).thenThrow(powsyblException);
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> filterService.getNetwork(NETWORK_UUID, VARIANT_ID));
@@ -129,11 +132,37 @@ class FilterServiceTest {
     }
 
     @Test
-    @MockitoSettings(strictness = Strictness.LENIENT)
-    void shouldReturnResourceFilterWhenSuccessful() {
-        when(filterService.getResourceFilter(any(), any(), any(), any(), any())).thenCallRealMethod();
-        when(networkStoreService.getNetwork(any(), any())).thenReturn(network);
+    void shouldReturnResourceFilterFromFiltersIds() {
         Optional<ResourceFilterDTO> resourceFilter = filterService.getResourceFilter(NETWORK_UUID, VARIANT_ID, new GlobalFilter(), List.of(), "testColumn");
+        assertTrue(resourceFilter.isPresent());
+        assertEquals(FILTERED_SUBJECT_ID, resourceFilter.get().value());
+    }
+
+    @Test
+    void shouldReturnEmptyResourceFilterWhenNoFilteredIds() {
+        AbstractFilterService returningEmptyFilterService = new TestFilterService(RestClient.builder(), networkStoreService, FILTER_SERVER_BASE_URI);
+        Optional<ResourceFilterDTO> resourceFilter = returningEmptyFilterService.getResourceFilter(NETWORK_UUID, VARIANT_ID, new GlobalFilter(), List.of(), "testColumn");
         assertFalse(resourceFilter.isPresent());
+    }
+
+    private static final class TestFilterService extends AbstractFilterService {
+
+        private final List<String> filteredSubjectIds;
+
+        private TestFilterService(List<String> filteredSubjectIds, RestClient.Builder restClientBuilder, NetworkStoreService networkStoreService, String filterServerBaseUri) {
+            this.filteredSubjectIds = filteredSubjectIds;
+            super(restClientBuilder, networkStoreService, filterServerBaseUri);
+        }
+
+        private TestFilterService(RestClient.Builder restClientBuilder, NetworkStoreService networkStoreService, String filterServerBaseUri) {
+            this.filteredSubjectIds = List.of();
+            super(restClientBuilder, networkStoreService, filterServerBaseUri);
+        }
+
+        @Override
+        protected List<String> getFilteredIds(UUID networkUuid, String variantId, org.gridsuite.filter.globalfilter.GlobalFilter globalFilter,
+                                              List<org.gridsuite.filter.utils.EquipmentType> equipmentTypes) {
+            return filteredSubjectIds;
+        }
     }
 }

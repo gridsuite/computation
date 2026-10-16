@@ -13,7 +13,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
 /**
- * @author Anis Touri <anis.touri at rte-france.com
+ * @author Anis Touri <anis.touri at rte-france.com>
  */
 @Aspect
 @AllArgsConstructor

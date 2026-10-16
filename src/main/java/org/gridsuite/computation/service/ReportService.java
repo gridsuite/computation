@@ -12,13 +12,11 @@ import com.powsybl.commons.PowsyblException;
 import com.powsybl.commons.report.ReportNode;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Objects;
@@ -36,16 +34,16 @@ public class ReportService {
     @Setter
     private String reportServerBaseUri;
 
-    private final RestTemplate restTemplate;
+    private final RestClient restClient;
 
     private final ObjectMapper objectMapper;
 
     public ReportService(ObjectMapper objectMapper,
                          @Value("${gridsuite.services.report-server.base-uri:http://report-server/}") String reportServerBaseUri,
-                         RestTemplateBuilder restTemplateBuilder) {
+                         RestClient.Builder restClientBuilder) {
         this.reportServerBaseUri = reportServerBaseUri;
         this.objectMapper = objectMapper;
-        this.restTemplate = restTemplateBuilder.build();
+        this.restClient = restClientBuilder.build();
     }
 
     private String getReportServerURI() {
@@ -63,7 +61,12 @@ public class ReportService {
 
         try {
             String str = objectMapper.writeValueAsString(reportNode);
-            restTemplate.exchange(getReportServerURI() + path, HttpMethod.PUT, new HttpEntity<>(str, headers), ReportNode.class);
+            restClient.method(HttpMethod.PUT)
+                    .uri(getReportServerURI() + path)
+                    .headers(httpHeaders -> httpHeaders.addAll(headers))
+                    .body(str)
+                    .retrieve()
+                    .toEntity(ReportNode.class);
         } catch (JsonProcessingException error) {
             throw new PowsyblException("Error sending report", error);
         }
@@ -78,6 +81,10 @@ public class ReportService {
                 .toUriString();
         var headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        restTemplate.exchange(getReportServerURI() + path, HttpMethod.DELETE, new HttpEntity<>(headers), Void.class);
+        restClient.method(HttpMethod.DELETE)
+                .uri(getReportServerURI() + path)
+                .headers(httpHeaders -> httpHeaders.addAll(headers))
+                .retrieve()
+                .toBodilessEntity();
     }
 }

@@ -6,6 +6,11 @@
  */
 package org.gridsuite.computation;
 
+import com.powsybl.contingency.violations.BusBreakerViolationLocation;
+import com.powsybl.contingency.violations.LimitViolation;
+import com.powsybl.contingency.violations.LimitViolationType;
+import com.powsybl.contingency.violations.NodeBreakerViolationLocation;
+import com.powsybl.contingency.violations.ViolationLocation;
 import com.powsybl.iidm.network.*;
 import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
 import com.powsybl.security.*;

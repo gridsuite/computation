@@ -158,42 +158,44 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
     }
 
     public Consumer<Message<String>> consumeRun() {
-        return message -> {
-            AbstractResultContext<C> resultContext = fromMessage(message);
-            AtomicReference<ReportNode> rootReporter = new AtomicReference<>(ReportNode.NO_OP);
-            try {
-                Network network = getNetwork(resultContext.getRunContext().getNetworkUuid(),
-                        resultContext.getRunContext().getVariantId());
-                resultContext.getRunContext().setNetwork(network);
-                observer.observe("global.run", resultContext.getRunContext(), () -> {
-                    long startTime = System.nanoTime();
-                    R result = run(resultContext.getRunContext(), resultContext.getResultUuid(), rootReporter);
+        return this::handleRunMessage;
+    }
 
-                    LOGGER.info("Just run in {}s", TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime));
+    private void handleRunMessage(Message<String> message) {
+        AbstractResultContext<C> resultContext = fromMessage(message);
+        AtomicReference<ReportNode> rootReporter = new AtomicReference<>(ReportNode.NO_OP);
+        try {
+            Network network = getNetwork(resultContext.getRunContext().getNetworkUuid(),
+                    resultContext.getRunContext().getVariantId());
+            resultContext.getRunContext().setNetwork(network);
+            observer.observe("global.run", resultContext.getRunContext(), () -> {
+                long startTime = System.nanoTime();
+                R result = run(resultContext.getRunContext(), resultContext.getResultUuid(), rootReporter);
 
-                    if (resultCanBeSaved(result)) {
-                        startTime = System.nanoTime();
-                        observer.observe("results.save", resultContext.getRunContext(), () -> saveResult(network, resultContext, result));
+                LOGGER.info("Just run in {}s", TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime));
 
-                        LOGGER.info("Stored in {}s", TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime));
+                if (resultCanBeSaved(result)) {
+                    startTime = System.nanoTime();
+                    observer.observe("results.save", resultContext.getRunContext(), () -> saveResult(network, resultContext, result));
 
-                        sendResultMessage(resultContext, result);
-                        LOGGER.info("{} complete (resultUuid='{}')", getComputationType(), resultContext.getResultUuid());
-                    }
-                });
-            } catch (CancellationException e) {
-                // Do nothing
-            } catch (Exception e) {
-                resultService.delete(resultContext.getResultUuid());
-                this.handleNonCancellationException(resultContext, e, rootReporter);
-                throw new ComputationRunException(PowsyblWsProblemDetail.fromException(e, serverNameProvider.serverName()).toString(), e);
-            } finally {
-                if (Boolean.TRUE.equals(resultContext.getRunContext().getDebug())) {
-                    processDebug(resultContext);
+                    LOGGER.info("Stored in {}s", TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime));
+
+                    sendResultMessage(resultContext, result);
+                    LOGGER.info("{} complete (resultUuid='{}')", getComputationType(), resultContext.getResultUuid());
                 }
-                clean(resultContext);
+            });
+        } catch (CancellationException e) {
+            // Do nothing
+        } catch (Exception e) {
+            resultService.delete(resultContext.getResultUuid());
+            this.handleNonCancellationException(resultContext, e, rootReporter);
+            throw new ComputationRunException(PowsyblWsProblemDetail.fromException(e, serverNameProvider.serverName()).toString(), e);
+        } finally {
+            if (Boolean.TRUE.equals(resultContext.getRunContext().getDebug())) {
+                processDebug(resultContext);
             }
-        };
+            clean(resultContext);
+        }
     }
 
     /**
@@ -261,10 +263,14 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
     protected void handleNonCancellationException(AbstractResultContext<C> resultContext, Exception exception, AtomicReference<ReportNode> rootReporter) {
     }
 
+    protected boolean canBeCancelled(UUID resultUuid) {
+        return true;
+    }
+
     public Consumer<Message<String>> consumeCancel() {
         return message -> {
             CancelContext cancelContext = CancelContext.fromMessage(message);
-            boolean isCancelled = cancelAsync(cancelContext);
+            boolean isCancelled = canBeCancelled(cancelContext.resultUuid()) && cancelAsync(cancelContext);
             if (!isCancelled) {
                 notificationService.publishCancelFailed(cancelContext.resultUuid(), cancelContext.receiver(), getComputationType(), cancelContext.userId());
             }
@@ -306,6 +312,9 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
         }
     }
 
+    protected void setRunningStatus(UUID resultUuid) {
+    }
+
     protected R run(C runContext, UUID resultUuid, AtomicReference<ReportNode> rootReporter) {
         String provider = runContext.getProvider();
         ReportNode reportNode = ReportNode.NO_OP;
@@ -328,6 +337,11 @@ public abstract class AbstractWorkerService<R, C extends AbstractComputationRunC
         runContext.setReportNode(reportNode);
 
         preRun(runContext);
+        if (resultUuid != null) {
+            setRunningStatus(resultUuid);
+            notificationService.sendRunningMessage(resultUuid, runContext.getReceiver(), runContext.getUserId(), null);
+        }
+
         CompletableFuture<R> future = runAsync(runContext, provider, resultUuid);
         R result = future == null ? null : observer.observeRun("run", runContext, future::join);
         postRun(runContext, rootReporter, result);
