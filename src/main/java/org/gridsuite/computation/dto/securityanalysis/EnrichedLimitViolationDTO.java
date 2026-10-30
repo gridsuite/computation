@@ -13,7 +13,7 @@ import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
 @Getter
-@Builder(toBuilder = true)
+@Builder
 @Jacksonized
 public class EnrichedLimitViolationDTO {
     private final String subjectId;
