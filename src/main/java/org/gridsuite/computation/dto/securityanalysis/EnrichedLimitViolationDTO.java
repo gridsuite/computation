@@ -6,16 +6,18 @@
  */
 package org.gridsuite.computation.dto.securityanalysis;
 
-import com.powsybl.contingency.violations.LimitViolation;
 import com.powsybl.contingency.violations.LimitViolationType;
 import com.powsybl.iidm.network.ThreeSides;
+import lombok.Builder;
 import lombok.Getter;
-import org.gridsuite.computation.utils.ComputationResultUtils;
-import org.springframework.lang.Nullable;
+import lombok.extern.jackson.Jacksonized;
 
 @Getter
+@Builder(toBuilder = true)
+@Jacksonized
 public class EnrichedLimitViolationDTO {
     private final String subjectId;
+    private final String subjectName;
     private final double limit;
     private final String limitName;
     private final String operationalLimitsGroupId;
@@ -31,21 +33,4 @@ public class EnrichedLimitViolationDTO {
     private final String locationId;
     private final Integer acceptableDuration;
 
-    public EnrichedLimitViolationDTO(LimitViolation limitViolation, @Nullable LimitViolationEnrichmentDTO enrichment) {
-        subjectId = limitViolation.getSubjectId();
-        limit = limitViolation.getLimit();
-        limitName = limitViolation.getLimitName();
-        operationalLimitsGroupId = limitViolation.getOperationalLimitsGroupId();
-        limitType = limitViolation.getLimitType();
-        limitReduction = limitViolation.getLimitReduction();
-        value = limitViolation.getValue();
-        side = limitViolation.getSide();
-        loading = ComputationResultUtils.computeLoading(limitViolation, limitViolation.getLimit());
-        upcomingAcceptableDuration = ComputationResultUtils.calculateUpcomingOverloadDuration(limitViolation);
-        patlLimit = enrichment != null ? enrichment.getPatlLimit() : null;
-        patlLoading = enrichment != null ? enrichment.getPatlLoading() : null;
-        nextLimitName = enrichment != null ? enrichment.getNextLimitName() : null;
-        locationId = enrichment != null ? enrichment.getLocationId() : null;
-        acceptableDuration = enrichment != null ? enrichment.getAcceptableDuration() : null;
-    }
 }

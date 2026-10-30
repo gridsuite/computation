@@ -130,10 +130,6 @@ public final class ComputationResultUtils {
         return null;
     }
 
-    public static String getViolationId(LimitViolation limitViolation) {
-        return limitViolation.getSubjectId() + "_" + limitViolation.getLimitType() + "_" + limitViolation.getSide() + "_" + limitViolation.getLimitName();
-    }
-
     public static String getViolationLocationId(LimitViolation limitViolation, Network network) {
         // LocationId only for voltage-based limit violations
         if (!Set.of(LOW_VOLTAGE, HIGH_VOLTAGE, LOW_VOLTAGE_ANGLE, HIGH_VOLTAGE_ANGLE).contains(limitViolation.getLimitType())) {

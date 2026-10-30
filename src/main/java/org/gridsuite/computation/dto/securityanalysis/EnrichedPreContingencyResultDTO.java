@@ -7,23 +7,19 @@
 package org.gridsuite.computation.dto.securityanalysis;
 
 import com.powsybl.security.results.PreContingencyResult;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import org.gridsuite.computation.utils.ComputationResultUtils;
+import lombok.NonNull;
+import lombok.extern.jackson.Jacksonized;
 
 import java.util.List;
-import java.util.Map;
 
 @Getter
-@AllArgsConstructor
+@Builder
+@Jacksonized
 public class EnrichedPreContingencyResultDTO {
+    @NonNull
     private final PreContingencyResult result;
-    private final Map<String, LimitViolationEnrichmentDTO> limitViolationEnrichment;
-
-    public List<EnrichedLimitViolationDTO> getEnrichedLimitViolations() {
-        return result.getLimitViolationsResult().getLimitViolations().stream()
-            .map(violation -> new EnrichedLimitViolationDTO(violation,
-                limitViolationEnrichment != null ? limitViolationEnrichment.get(ComputationResultUtils.getViolationId(violation)) : null))
-            .toList();
-    }
+    @NonNull
+    private final List<EnrichedLimitViolationDTO> enrichedLimitViolations;
 }

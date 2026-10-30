@@ -6,38 +6,22 @@
  */
 package org.gridsuite.computation.dto.securityanalysis;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.powsybl.security.SecurityAnalysisResult;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.extern.jackson.Jacksonized;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Radouane Khouadri <redouane.khouadri_externe at rte-france.com>
  */
 @Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Jacksonized
 public class EnrichedSecurityAnalysisResultDTO {
-    private SecurityAnalysisResult result;
-    private Map<String, LimitViolationEnrichmentDTO> preContingencyEnrichment;
-    private Map<String, Map<String, LimitViolationEnrichmentDTO>> postContingencyEnrichment;
-
-    @JsonIgnore
-    public EnrichedPreContingencyResultDTO getEnrichedPreContingencyResult() {
-        return new EnrichedPreContingencyResultDTO(result.getPreContingencyResult(), preContingencyEnrichment);
-    }
-
-    @JsonIgnore
-    public List<EnrichedPostContingencyResultDTO> getEnrichedPostContingencyResults() {
-        return result.getPostContingencyResults().stream()
-            .map(postContingencyResult -> new EnrichedPostContingencyResultDTO(postContingencyResult,
-                postContingencyEnrichment != null ? postContingencyEnrichment.get(postContingencyResult.getContingency().getId()) : null))
-            .toList();
-    }
+    @NonNull
+    private final EnrichedPreContingencyResultDTO enrichedPreContingencyResult;
+    @NonNull
+    private final List<EnrichedPostContingencyResultDTO> enrichedPostContingencyResults;
 }
