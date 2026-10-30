@@ -6,12 +6,14 @@
  */
 package org.gridsuite.computation.dto.securityanalysis;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.powsybl.security.SecurityAnalysisResult;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,4 +27,17 @@ public class EnrichedSecurityAnalysisResultDTO {
     private SecurityAnalysisResult result;
     private Map<String, EnrichedLimitViolationDTO> preContingencyEnrichment;
     private Map<String, Map<String, EnrichedLimitViolationDTO>> postContingencyEnrichment;
+
+    @JsonIgnore
+    public EnrichedPreContingencyResultDTO getEnrichedPreContingencyResult() {
+        return new EnrichedPreContingencyResultDTO(result.getPreContingencyResult(), preContingencyEnrichment);
+    }
+
+    @JsonIgnore
+    public List<EnrichedPostContingencyResultDTO> getEnrichedPostContingencyResults() {
+        return result.getPostContingencyResults().stream()
+            .map(postContingencyResult -> new EnrichedPostContingencyResultDTO(postContingencyResult,
+                postContingencyEnrichment != null ? postContingencyEnrichment.get(postContingencyResult.getContingency().getId()) : null))
+            .toList();
+    }
 }

@@ -17,7 +17,10 @@ import org.springframework.lang.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.powsybl.contingency.violations.LimitViolationType.*;
+import static com.powsybl.contingency.violations.LimitViolationType.HIGH_VOLTAGE;
+import static com.powsybl.contingency.violations.LimitViolationType.HIGH_VOLTAGE_ANGLE;
+import static com.powsybl.contingency.violations.LimitViolationType.LOW_VOLTAGE;
+import static com.powsybl.contingency.violations.LimitViolationType.LOW_VOLTAGE_ANGLE;
 import static com.powsybl.contingency.violations.ViolationLocation.Type.NODE_BREAKER;
 import static com.powsybl.iidm.network.IdentifiableType.BUSBAR_SECTION;
 
