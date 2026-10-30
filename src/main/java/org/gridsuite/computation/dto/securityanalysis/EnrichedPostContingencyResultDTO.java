@@ -6,21 +6,24 @@
  */
 package org.gridsuite.computation.dto.securityanalysis;
 
-import com.powsybl.contingency.violations.LimitViolation;
 import com.powsybl.security.results.PostContingencyResult;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.gridsuite.computation.utils.ComputationResultUtils;
 
+import java.util.List;
 import java.util.Map;
 
 @Getter
 @AllArgsConstructor
 public class EnrichedPostContingencyResultDTO {
     private final PostContingencyResult result;
-    private final Map<String, EnrichedLimitViolationDTO> limitViolationEnrichment;
+    private final Map<String, LimitViolationEnrichmentDTO> limitViolationEnrichment;
 
-    public EnrichedLimitViolationDTO getEnrichment(LimitViolation violation) {
-        return limitViolationEnrichment != null ? limitViolationEnrichment.get(ComputationResultUtils.getViolationId(violation)) : null;
+    public List<EnrichedLimitViolationDTO> getEnrichedLimitViolations() {
+        return result.getLimitViolationsResult().getLimitViolations().stream()
+            .map(violation -> new EnrichedLimitViolationDTO(violation,
+                limitViolationEnrichment != null ? limitViolationEnrichment.get(ComputationResultUtils.getViolationId(violation)) : null))
+            .toList();
     }
 }

@@ -25,8 +25,8 @@ import java.util.Map;
 @AllArgsConstructor
 public class EnrichedSecurityAnalysisResultDTO {
     private SecurityAnalysisResult result;
-    private Map<String, EnrichedLimitViolationDTO> preContingencyEnrichment;
-    private Map<String, Map<String, EnrichedLimitViolationDTO>> postContingencyEnrichment;
+    private Map<String, LimitViolationEnrichmentDTO> preContingencyEnrichment;
+    private Map<String, Map<String, LimitViolationEnrichmentDTO>> postContingencyEnrichment;
 
     @JsonIgnore
     public EnrichedPreContingencyResultDTO getEnrichedPreContingencyResult() {

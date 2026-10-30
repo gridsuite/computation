@@ -25,15 +25,15 @@ public final class SecurityAnalysisEnricher {
 
     public static EnrichedSecurityAnalysisResultDTO enrich(SecurityAnalysisResult result, Network network) {
         PreContingencyResult preContingencyResult = result.getPreContingencyResult();
-        Map<String, EnrichedLimitViolationDTO> preContingencyEnrichment = preContingencyResult != null
+        Map<String, LimitViolationEnrichmentDTO> preContingencyEnrichment = preContingencyResult != null
             ? enrichPreContingency(preContingencyResult, network)
             : new HashMap<>();
-        Map<String, Map<String, EnrichedLimitViolationDTO>> postContingencyEnrichment = new HashMap<>();
+        Map<String, Map<String, LimitViolationEnrichmentDTO>> postContingencyEnrichment = new HashMap<>();
 
         if (result.getPostContingencyResults() != null) {
             for (PostContingencyResult postContingencyResult : result.getPostContingencyResults()) {
                 if (postContingencyResult.getLimitViolationsResult() != null) {
-                    Map<String, EnrichedLimitViolationDTO> contingencyEnrichment = new HashMap<>();
+                    Map<String, LimitViolationEnrichmentDTO> contingencyEnrichment = new HashMap<>();
                     postContingencyResult.getLimitViolationsResult().getLimitViolations().forEach(violation -> {
                         contingencyEnrichment.put(ComputationResultUtils.getViolationId(violation), enrichViolation(violation, network));
                     });
@@ -49,8 +49,8 @@ public final class SecurityAnalysisEnricher {
             .build();
     }
 
-    private static Map<String, EnrichedLimitViolationDTO> enrichPreContingency(PreContingencyResult preContingencyResult, Network network) {
-        Map<String, EnrichedLimitViolationDTO> enrichment = new HashMap<>();
+    private static Map<String, LimitViolationEnrichmentDTO> enrichPreContingency(PreContingencyResult preContingencyResult, Network network) {
+        Map<String, LimitViolationEnrichmentDTO> enrichment = new HashMap<>();
         if (preContingencyResult.getLimitViolationsResult() != null) {
             preContingencyResult.getLimitViolationsResult().getLimitViolations().forEach(violation -> {
                 enrichment.put(ComputationResultUtils.getViolationId(violation), enrichViolation(violation, network));
@@ -59,9 +59,9 @@ public final class SecurityAnalysisEnricher {
         return enrichment;
     }
 
-    private static EnrichedLimitViolationDTO enrichViolation(LimitViolation violation, Network network) {
+    private static LimitViolationEnrichmentDTO enrichViolation(LimitViolation violation, Network network) {
         Double patlLimit = ComputationResultUtils.getPatlLimit(violation, network);
-        return EnrichedLimitViolationDTO.builder()
+        return LimitViolationEnrichmentDTO.builder()
             .patlLimit(patlLimit)
             .patlLoading(ComputationResultUtils.computeLoading(violation, patlLimit))
             .nextLimitName(ComputationResultUtils.getNextLimitName(violation, network))
