@@ -4,14 +4,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.gridsuite.computation.dto.securityanalysis;
+package org.gridsuite.computation.utils;
 
 import com.powsybl.contingency.violations.LimitViolation;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.security.SecurityAnalysisResult;
 import com.powsybl.security.results.PostContingencyResult;
 import com.powsybl.security.results.PreContingencyResult;
-import org.gridsuite.computation.utils.ComputationResultUtils;
+import org.gridsuite.computation.dto.securityanalysis.EnrichedSecurityAnalysisResultDTO;
+import org.gridsuite.computation.dto.securityanalysis.LimitViolationEnrichmentDTO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,20 +26,20 @@ public final class SecurityAnalysisEnricher {
 
     public static EnrichedSecurityAnalysisResultDTO enrich(SecurityAnalysisResult result, Network network) {
         PreContingencyResult preContingencyResult = result.getPreContingencyResult();
-        Map<String, EnrichedLimitViolationDTO> preContingencyEnrichment = preContingencyResult != null
+        Map<String, LimitViolationEnrichmentDTO> preContingencyEnrichment = preContingencyResult != null
             ? enrichPreContingency(preContingencyResult, network)
             : new HashMap<>();
-        Map<String, Map<String, EnrichedLimitViolationDTO>> postContingencyEnrichment = new HashMap<>();
+        Map<String, Map<String, LimitViolationEnrichmentDTO>> postContingencyEnrichment = new HashMap<>();
 
         if (result.getPostContingencyResults() != null) {
             for (PostContingencyResult postContingencyResult : result.getPostContingencyResults()) {
+                Map<String, LimitViolationEnrichmentDTO> contingencyEnrichment = new HashMap<>();
                 if (postContingencyResult.getLimitViolationsResult() != null) {
-                    Map<String, EnrichedLimitViolationDTO> contingencyEnrichment = new HashMap<>();
                     postContingencyResult.getLimitViolationsResult().getLimitViolations().forEach(violation -> {
                         contingencyEnrichment.put(ComputationResultUtils.getViolationId(violation), enrichViolation(violation, network));
                     });
-                    postContingencyEnrichment.put(postContingencyResult.getContingency().getId(), contingencyEnrichment);
                 }
+                postContingencyEnrichment.put(postContingencyResult.getContingency().getId(), contingencyEnrichment);
             }
         }
 
@@ -49,8 +50,8 @@ public final class SecurityAnalysisEnricher {
             .build();
     }
 
-    private static Map<String, EnrichedLimitViolationDTO> enrichPreContingency(PreContingencyResult preContingencyResult, Network network) {
-        Map<String, EnrichedLimitViolationDTO> enrichment = new HashMap<>();
+    private static Map<String, LimitViolationEnrichmentDTO> enrichPreContingency(PreContingencyResult preContingencyResult, Network network) {
+        Map<String, LimitViolationEnrichmentDTO> enrichment = new HashMap<>();
         if (preContingencyResult.getLimitViolationsResult() != null) {
             preContingencyResult.getLimitViolationsResult().getLimitViolations().forEach(violation -> {
                 enrichment.put(ComputationResultUtils.getViolationId(violation), enrichViolation(violation, network));
@@ -59,14 +60,16 @@ public final class SecurityAnalysisEnricher {
         return enrichment;
     }
 
-    private static EnrichedLimitViolationDTO enrichViolation(LimitViolation violation, Network network) {
+    private static LimitViolationEnrichmentDTO enrichViolation(LimitViolation violation, Network network) {
         Double patlLimit = ComputationResultUtils.getPatlLimit(violation, network);
-        return EnrichedLimitViolationDTO.builder()
+        return LimitViolationEnrichmentDTO.builder()
+            .loading(ComputationResultUtils.computeLoading(violation, violation.getLimit()))
             .patlLimit(patlLimit)
             .patlLoading(ComputationResultUtils.computeLoading(violation, patlLimit))
             .nextLimitName(ComputationResultUtils.getNextLimitName(violation, network))
             .locationId(ComputationResultUtils.getViolationLocationId(violation, network))
             .acceptableDuration(ComputationResultUtils.calculateActualOverloadDuration(violation, network))
+            .upcomingAcceptableDuration(ComputationResultUtils.calculateUpcomingOverloadDuration(violation))
             .build();
     }
 }

@@ -181,9 +181,7 @@ public final class ComputationResultUtils {
     }
 
     private static String formatViolationLocationId(List<String> elementsIds, String subjectId) {
-        return !elementsIds.isEmpty() ?
-            subjectId + " (" + String.join(", ", elementsIds) + ")" :
-            subjectId;
+        return elementsIds.isEmpty() ? subjectId : subjectId + " (" + String.join(", ", elementsIds) + ")";
     }
 
     private static String getBusBreakerViolationLocationId(BusBreakerViolationLocation busBreakerViolationLocation, Network network, String subjectId) {

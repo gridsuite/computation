@@ -18,10 +18,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EnrichedLimitViolationDTO {
+public class LimitViolationEnrichmentDTO {
+    private Double loading;
     private Double patlLimit;
     private Double patlLoading;
     private String nextLimitName;
     private String locationId;
     private Integer acceptableDuration;
+    private Integer upcomingAcceptableDuration;
 }
