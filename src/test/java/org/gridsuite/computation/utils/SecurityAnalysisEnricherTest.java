@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.gridsuite.computation.dto.securityanalysis;
+package org.gridsuite.computation.utils;
 
 import com.powsybl.contingency.BranchContingency;
 import com.powsybl.contingency.Contingency;
@@ -19,8 +19,8 @@ import com.powsybl.security.SecurityAnalysisResult;
 import com.powsybl.security.results.ConnectivityResult;
 import com.powsybl.security.results.NetworkResult;
 import com.powsybl.security.results.PostContingencyResult;
-import org.gridsuite.computation.utils.ComputationResultUtils;
-import org.gridsuite.computation.utils.SecurityAnalysisEnricher;
+import org.gridsuite.computation.dto.securityanalysis.EnrichedSecurityAnalysisResultDTO;
+import org.gridsuite.computation.dto.securityanalysis.LimitViolationEnrichmentDTO;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
