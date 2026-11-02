@@ -10,7 +10,7 @@ import com.powsybl.contingency.BranchContingency;
 import com.powsybl.contingency.Contingency;
 import com.powsybl.contingency.violations.LimitViolation;
 import com.powsybl.contingency.violations.LimitViolationType;
-import com.powsybl.iidm.network.TwoSides;
+import com.powsybl.iidm.network.ThreeSides;
 import com.powsybl.loadflow.LoadFlowResult;
 import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
 import com.powsybl.security.LimitViolationsResult;
@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class SecurityAnalysisEnricherTest {
     @Test
     void enrichesPreContingencyPostContingencyAndEmptyResults() {
-        LimitViolation violation = new LimitViolation("line", LimitViolationType.CURRENT, "TATL", 600, 200, 1, 150, TwoSides.ONE);
+        LimitViolation violation = new LimitViolation("line", null, null, LimitViolationType.CURRENT, "TATL", 600, 200, 1, 150, ThreeSides.ONE, null);
         SecurityAnalysisResult result = new SecurityAnalysisResult(
             new LimitViolationsResult(List.of(violation)),
             LoadFlowResult.ComponentResult.Status.CONVERGED,

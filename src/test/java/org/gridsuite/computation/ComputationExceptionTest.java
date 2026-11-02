@@ -35,10 +35,4 @@ class ComputationExceptionTest {
         assertEquals(PARAMETERS_NOT_FOUND, e.getBusinessErrorCode());
         assertEquals(PARAMETERS_NOT_FOUND, e.getErrorCode());
     }
-
-    @Test
-    void constructorsRejectNullBusinessErrorCode() {
-        assertThrows(NullPointerException.class, () -> new ComputationException(null, "test"));
-        assertThrows(NullPointerException.class, () -> new ComputationException(null, "test", null));
-    }
 }

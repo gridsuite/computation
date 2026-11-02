@@ -31,16 +31,16 @@ class ComputationUtilTest {
 
     @Test
     void testLoadingUpcomingDurationAndViolationId() {
-        LimitViolation currentViolation = new LimitViolation("line", LimitViolationType.CURRENT, "TATL", 600, 200, 1, 150, TwoSides.ONE);
+        LimitViolation currentViolation = createLimitViolation("line", LimitViolationType.CURRENT, "TATL", 600, 200, 150);
         assertEquals(75.0, ComputationResultUtils.computeLoading(currentViolation, currentViolation.getLimit()), 0.001);
         assertEquals(600, ComputationResultUtils.calculateUpcomingOverloadDuration(currentViolation));
         assertEquals("line_CURRENT_ONE_TATL", ComputationResultUtils.getViolationId(currentViolation));
 
         assertNull(ComputationResultUtils.computeLoading(currentViolation, null));
         assertNull(ComputationResultUtils.calculateUpcomingOverloadDuration(
-            new LimitViolation("line", LimitViolationType.CURRENT, "TATL", 600, 200, 1, 200, TwoSides.ONE)));
+            createLimitViolation("line", LimitViolationType.CURRENT, "TATL", 600, 200, 200)));
         assertNull(ComputationResultUtils.computeLoading(
-            new LimitViolation("bus", LimitViolationType.HIGH_VOLTAGE, "low", 0, 1, 1, 0.9, TwoSides.ONE), 1.0));
+            createLimitViolation("bus", LimitViolationType.HIGH_VOLTAGE, "low", 0, 1, 0.9), 1.0));
     }
 
     @Test
@@ -61,33 +61,33 @@ class ComputationUtilTest {
         when(temporaryLimit.getValue()).thenReturn(300.0);
         when(temporaryLimit.getAcceptableDuration()).thenReturn(60);
 
-        LimitViolation permanentViolation = new LimitViolation(
-            "line", LimitViolationType.CURRENT, LoadingLimits.DEFAULT_PERMANENT_LIMIT_NAME, 3600, 100, 1, 90, TwoSides.ONE);
+        LimitViolation permanentViolation = createLimitViolation(
+            "line", LimitViolationType.CURRENT, LoadingLimits.DEFAULT_PERMANENT_LIMIT_NAME, 3600, 100, 90);
         assertEquals(100.0, ComputationResultUtils.getPatlLimit(permanentViolation, network));
         assertEquals("TATL", ComputationResultUtils.getNextLimitName(permanentViolation, network));
 
-        LimitViolation tatlViolation = new LimitViolation("line", LimitViolationType.CURRENT, "TATL", 1800, 200, 1, 150, TwoSides.ONE);
+        LimitViolation tatlViolation = createLimitViolation("line", LimitViolationType.CURRENT, "TATL", 1800, 200, 150);
         assertEquals("1m", ComputationResultUtils.getNextLimitName(tatlViolation, network));
         assertEquals(600, ComputationResultUtils.calculateActualOverloadDuration(tatlViolation, network));
         assertEquals(1800, ComputationResultUtils.calculateUpcomingOverloadDuration(tatlViolation));
         assertNull(ComputationResultUtils.getNextLimitName(
-            new LimitViolation("line", LimitViolationType.CURRENT, "1m", 60, 300, 1, 250, TwoSides.ONE), network));
+            createLimitViolation("line", LimitViolationType.CURRENT, "1m", 60, 300, 250), network));
 
-        LimitViolation overloadedViolation = new LimitViolation("line", LimitViolationType.CURRENT, "TATL", 60, 200, 1, 250, TwoSides.ONE);
+        LimitViolation overloadedViolation = createLimitViolation("line", LimitViolationType.CURRENT, "TATL", 60, 200, 250);
         assertEquals(60, ComputationResultUtils.calculateActualOverloadDuration(overloadedViolation, network));
         assertNull(ComputationResultUtils.calculateUpcomingOverloadDuration(overloadedViolation));
 
-        LimitViolation belowPatlViolation = new LimitViolation("line", LimitViolationType.CURRENT, "1m", 60, 300, 1, 90, TwoSides.ONE);
+        LimitViolation belowPatlViolation = createLimitViolation("line", LimitViolationType.CURRENT, "1m", 60, 300, 90);
         assertNull(ComputationResultUtils.calculateActualOverloadDuration(belowPatlViolation, network));
 
-        LimitViolation belowViolationLimit = new LimitViolation("line", LimitViolationType.CURRENT, "1m", 60, 400, 1, 350, TwoSides.ONE);
+        LimitViolation belowViolationLimit = createLimitViolation("line", LimitViolationType.CURRENT, "1m", 60, 400, 350);
         assertNull(ComputationResultUtils.calculateActualOverloadDuration(belowViolationLimit, network));
     }
 
     @Test
     void testMissingBranchHasNoPatlOrNextLimit() {
         Network network = mock(Network.class);
-        LimitViolation violation = new LimitViolation("missing", LimitViolationType.CURRENT, "TATL", 60, 200, 1, 150, TwoSides.ONE);
+        LimitViolation violation = createLimitViolation("missing", LimitViolationType.CURRENT, "TATL", 60, 200, 150);
 
         assertNull(ComputationResultUtils.getPatlLimit(violation, network));
         assertNull(ComputationResultUtils.getNextLimitName(violation, network));
@@ -96,7 +96,7 @@ class ComputationUtilTest {
         Branch<?> branchWithoutLimits = mock(Branch.class);
         when(network.getBranch("no-limits")).thenReturn(branchWithoutLimits);
         when(branchWithoutLimits.getCurrentLimits(TwoSides.ONE)).thenReturn(Optional.empty());
-        LimitViolation noLimitsViolation = new LimitViolation("no-limits", LimitViolationType.CURRENT, "TATL", 60, 200, 1, 150, TwoSides.ONE);
+        LimitViolation noLimitsViolation = createLimitViolation("no-limits", LimitViolationType.CURRENT, "TATL", 60, 200, 150);
         assertNull(ComputationResultUtils.getPatlLimit(noLimitsViolation, network));
         assertNull(ComputationResultUtils.getNextLimitName(noLimitsViolation, network));
         assertNull(ComputationResultUtils.calculateActualOverloadDuration(noLimitsViolation, network));
@@ -141,6 +141,15 @@ class ComputationUtilTest {
             .add();
 
         return network;
+    }
+
+    private static LimitViolation createLimitViolation(String subjectId,
+                                                       LimitViolationType type,
+                                                       String limitName,
+                                                       int acceptableDuration,
+                                                       double limit,
+                                                       double value) {
+        return new LimitViolation(subjectId, null, null, type, limitName, acceptableDuration, limit, 1.0, value, ThreeSides.ONE, null);
     }
 
     public static Network createNodeBreakerNetwork() {
