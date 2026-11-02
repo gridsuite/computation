@@ -23,6 +23,7 @@ class ComputationExceptionTest {
         var cause = new RuntimeException("test");
         var e = new ComputationException(RUNNER_ERROR, "test", cause);
         assertEquals(RUNNER_ERROR, e.getBusinessErrorCode());
+        assertEquals(RUNNER_ERROR, e.getErrorCode());
         assertEquals("test", e.getMessage());
         assertEquals(cause, e.getCause());
     }
@@ -32,5 +33,12 @@ class ComputationExceptionTest {
         var e = new ComputationException(PARAMETERS_NOT_FOUND, "test");
         assertEquals("test", e.getMessage());
         assertEquals(PARAMETERS_NOT_FOUND, e.getBusinessErrorCode());
+        assertEquals(PARAMETERS_NOT_FOUND, e.getErrorCode());
+    }
+
+    @Test
+    void constructorsRejectNullBusinessErrorCode() {
+        assertThrows(NullPointerException.class, () -> new ComputationException(null, "test"));
+        assertThrows(NullPointerException.class, () -> new ComputationException(null, "test", null));
     }
 }

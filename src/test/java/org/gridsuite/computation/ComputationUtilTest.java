@@ -13,7 +13,6 @@ import com.powsybl.contingency.violations.NodeBreakerViolationLocation;
 import com.powsybl.contingency.violations.ViolationLocation;
 import com.powsybl.iidm.network.*;
 import com.powsybl.network.store.iidm.impl.NetworkFactoryImpl;
-import com.powsybl.security.*;
 import org.gridsuite.computation.utils.ComputationResultUtils;
 import org.junit.jupiter.api.Test;
 
@@ -21,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +28,79 @@ import static org.mockito.Mockito.when;
  * @author Jamal KHEYYAD <jamal.kheyyad at rte-international.com>
  */
 class ComputationUtilTest {
+
+    @Test
+    void testLoadingUpcomingDurationAndViolationId() {
+        LimitViolation currentViolation = new LimitViolation("line", LimitViolationType.CURRENT, "TATL", 600, 200, 1, 150, TwoSides.ONE);
+        assertEquals(75.0, ComputationResultUtils.computeLoading(currentViolation, currentViolation.getLimit()), 0.001);
+        assertEquals(600, ComputationResultUtils.calculateUpcomingOverloadDuration(currentViolation));
+        assertEquals("line_CURRENT_ONE_TATL", ComputationResultUtils.getViolationId(currentViolation));
+
+        assertNull(ComputationResultUtils.computeLoading(currentViolation, null));
+        assertNull(ComputationResultUtils.calculateUpcomingOverloadDuration(
+            new LimitViolation("line", LimitViolationType.CURRENT, "TATL", 600, 200, 1, 200, TwoSides.ONE)));
+        assertNull(ComputationResultUtils.computeLoading(
+            new LimitViolation("bus", LimitViolationType.HIGH_VOLTAGE, "low", 0, 1, 1, 0.9, TwoSides.ONE), 1.0));
+    }
+
+    @Test
+    void testPatlNextAndActualOverloadDuration() {
+        Network network = mock(Network.class);
+        Branch<?> branch = mock(Branch.class);
+        CurrentLimits currentLimits = mock(CurrentLimits.class);
+        LoadingLimits.TemporaryLimit tatl = mock(LoadingLimits.TemporaryLimit.class);
+        LoadingLimits.TemporaryLimit temporaryLimit = mock(LoadingLimits.TemporaryLimit.class);
+        when(network.getBranch("line")).thenReturn(branch);
+        when(branch.getCurrentLimits(TwoSides.ONE)).thenReturn(Optional.of(currentLimits));
+        when(currentLimits.getPermanentLimit()).thenReturn(100.0);
+        when(currentLimits.getTemporaryLimits()).thenReturn(List.of(tatl, temporaryLimit));
+        when(tatl.getName()).thenReturn("TATL");
+        when(tatl.getValue()).thenReturn(200.0);
+        when(tatl.getAcceptableDuration()).thenReturn(600);
+        when(temporaryLimit.getName()).thenReturn("1m");
+        when(temporaryLimit.getValue()).thenReturn(300.0);
+        when(temporaryLimit.getAcceptableDuration()).thenReturn(60);
+
+        LimitViolation permanentViolation = new LimitViolation(
+            "line", LimitViolationType.CURRENT, LoadingLimits.DEFAULT_PERMANENT_LIMIT_NAME, 3600, 100, 1, 90, TwoSides.ONE);
+        assertEquals(100.0, ComputationResultUtils.getPatlLimit(permanentViolation, network));
+        assertEquals("TATL", ComputationResultUtils.getNextLimitName(permanentViolation, network));
+
+        LimitViolation tatlViolation = new LimitViolation("line", LimitViolationType.CURRENT, "TATL", 1800, 200, 1, 150, TwoSides.ONE);
+        assertEquals("1m", ComputationResultUtils.getNextLimitName(tatlViolation, network));
+        assertEquals(600, ComputationResultUtils.calculateActualOverloadDuration(tatlViolation, network));
+        assertEquals(1800, ComputationResultUtils.calculateUpcomingOverloadDuration(tatlViolation));
+        assertNull(ComputationResultUtils.getNextLimitName(
+            new LimitViolation("line", LimitViolationType.CURRENT, "1m", 60, 300, 1, 250, TwoSides.ONE), network));
+
+        LimitViolation overloadedViolation = new LimitViolation("line", LimitViolationType.CURRENT, "TATL", 60, 200, 1, 250, TwoSides.ONE);
+        assertEquals(60, ComputationResultUtils.calculateActualOverloadDuration(overloadedViolation, network));
+        assertNull(ComputationResultUtils.calculateUpcomingOverloadDuration(overloadedViolation));
+
+        LimitViolation belowPatlViolation = new LimitViolation("line", LimitViolationType.CURRENT, "1m", 60, 300, 1, 90, TwoSides.ONE);
+        assertNull(ComputationResultUtils.calculateActualOverloadDuration(belowPatlViolation, network));
+
+        LimitViolation belowViolationLimit = new LimitViolation("line", LimitViolationType.CURRENT, "1m", 60, 400, 1, 350, TwoSides.ONE);
+        assertNull(ComputationResultUtils.calculateActualOverloadDuration(belowViolationLimit, network));
+    }
+
+    @Test
+    void testMissingBranchHasNoPatlOrNextLimit() {
+        Network network = mock(Network.class);
+        LimitViolation violation = new LimitViolation("missing", LimitViolationType.CURRENT, "TATL", 60, 200, 1, 150, TwoSides.ONE);
+
+        assertNull(ComputationResultUtils.getPatlLimit(violation, network));
+        assertNull(ComputationResultUtils.getNextLimitName(violation, network));
+        assertNull(ComputationResultUtils.calculateActualOverloadDuration(violation, network));
+
+        Branch<?> branchWithoutLimits = mock(Branch.class);
+        when(network.getBranch("no-limits")).thenReturn(branchWithoutLimits);
+        when(branchWithoutLimits.getCurrentLimits(TwoSides.ONE)).thenReturn(Optional.empty());
+        LimitViolation noLimitsViolation = new LimitViolation("no-limits", LimitViolationType.CURRENT, "TATL", 60, 200, 1, 150, TwoSides.ONE);
+        assertNull(ComputationResultUtils.getPatlLimit(noLimitsViolation, network));
+        assertNull(ComputationResultUtils.getNextLimitName(noLimitsViolation, network));
+        assertNull(ComputationResultUtils.calculateActualOverloadDuration(noLimitsViolation, network));
+    }
 
     static Network createBusBreakerNetwork() {
         Network network = new NetworkFactoryImpl().createNetwork("network", "test");
