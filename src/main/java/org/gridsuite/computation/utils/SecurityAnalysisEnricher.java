@@ -16,6 +16,12 @@ import org.gridsuite.computation.dto.securityanalysis.LimitViolationEnrichmentDT
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+
+import static com.powsybl.contingency.violations.LimitViolationType.HIGH_VOLTAGE;
+import static com.powsybl.contingency.violations.LimitViolationType.HIGH_VOLTAGE_ANGLE;
+import static com.powsybl.contingency.violations.LimitViolationType.LOW_VOLTAGE;
+import static com.powsybl.contingency.violations.LimitViolationType.LOW_VOLTAGE_ANGLE;
 
 /**
  * @author Radouane Khouadri <redouane.khouadri_externe at rte-france.com>
@@ -36,7 +42,10 @@ public final class SecurityAnalysisEnricher {
                 Map<String, LimitViolationEnrichmentDTO> contingencyEnrichment = new HashMap<>();
                 if (postContingencyResult.getLimitViolationsResult() != null) {
                     postContingencyResult.getLimitViolationsResult().getLimitViolations().forEach(violation -> {
-                        contingencyEnrichment.put(ComputationResultUtils.getViolationId(violation), enrichViolation(violation, network));
+                        String violationLocationId = !Set.of(LOW_VOLTAGE, HIGH_VOLTAGE, LOW_VOLTAGE_ANGLE, HIGH_VOLTAGE_ANGLE).contains(violation.getLimitType())
+                            ? ComputationResultUtils.getViolationId(violation)
+                            : ComputationResultUtils.getViolationLocationId(violation, network);
+                        contingencyEnrichment.put(violationLocationId, enrichViolation(violation, network));
                     });
                 }
                 postContingencyEnrichment.put(postContingencyResult.getContingency().getId(), contingencyEnrichment);
