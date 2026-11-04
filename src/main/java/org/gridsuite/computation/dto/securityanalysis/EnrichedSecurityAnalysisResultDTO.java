@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,6 +24,6 @@ import java.util.Map;
 @AllArgsConstructor
 public class EnrichedSecurityAnalysisResultDTO {
     private SecurityAnalysisResult result;
-    private Map<String, LimitViolationEnrichmentDTO> preContingencyEnrichment;
-    private Map<String, Map<String, LimitViolationEnrichmentDTO>> postContingencyEnrichment;
+    private List<LimitViolationEnrichmentDTO> preContingencyEnrichment;
+    private Map<String, List<LimitViolationEnrichmentDTO>> postContingencyEnrichment;
 }
