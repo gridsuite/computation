@@ -17,7 +17,6 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,14 +81,10 @@ public abstract class AbstractComputationService<C extends AbstractComputationRu
     }
 
     public void deleteResults(List<UUID> resultUuids) {
-        if (!CollectionUtils.isEmpty(resultUuids)) {
-            resultUuids.forEach(resultService::delete);
-        } else {
-            deleteResults();
-        }
+        Objects.requireNonNull(resultUuids, "resultUuids must not be null").forEach(resultService::delete);
     }
 
-    public void deleteResults() {
+    public void deleteAllResults() {
         resultService.deleteAll();
     }
 
