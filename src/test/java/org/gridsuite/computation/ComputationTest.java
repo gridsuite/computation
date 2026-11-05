@@ -385,6 +385,23 @@ class ComputationTest implements WithAssertions {
     }
 
     @Test
+    void testDeleteResults() {
+        UUID otherResultUuid = UUID.randomUUID();
+        UUID keptResultUuid = UUID.randomUUID();
+        computationService.setStatus(List.of(RESULT_UUID, otherResultUuid, keptResultUuid), MockComputationStatus.COMPLETED);
+
+        assertThrows(NullPointerException.class, () -> computationService.deleteResults(null));
+        computationService.deleteResults(List.of());
+        assertEquals(3, resultService.mockDBStatus.size());
+
+        computationService.deleteResults(List.of(RESULT_UUID, otherResultUuid));
+        assertEquals(Map.of(keptResultUuid, MockComputationStatus.COMPLETED), resultService.mockDBStatus);
+
+        computationService.deleteAllResults();
+        assertTrue(resultService.mockDBStatus.isEmpty());
+    }
+
+    @Test
     void testComputationCancelledBeforeRunReturnsNoResult() {
         workerService.consumeCancel().accept(message);
 
