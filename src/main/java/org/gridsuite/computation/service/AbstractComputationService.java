@@ -84,10 +84,6 @@ public abstract class AbstractComputationService<C extends AbstractComputationRu
         Objects.requireNonNull(resultUuids, "resultUuids must not be null").forEach(resultService::delete);
     }
 
-    public void deleteAllResults() {
-        resultService.deleteAll();
-    }
-
     public void setStatus(List<UUID> resultUuids, S status) {
         resultService.insertStatus(resultUuids, status);
     }

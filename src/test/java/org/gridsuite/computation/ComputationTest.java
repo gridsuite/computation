@@ -122,11 +122,6 @@ class ComputationTest implements WithAssertions {
         }
 
         @Override
-        public void deleteAll() {
-            mockDBStatus.clear();
-        }
-
-        @Override
         public MockComputationStatus findStatus(UUID resultUuid) {
             return mockDBStatus.get(resultUuid);
         }
@@ -396,9 +391,6 @@ class ComputationTest implements WithAssertions {
 
         computationService.deleteResults(List.of(RESULT_UUID, otherResultUuid));
         assertEquals(Map.of(keptResultUuid, MockComputationStatus.COMPLETED), resultService.mockDBStatus);
-
-        computationService.deleteAllResults();
-        assertTrue(resultService.mockDBStatus.isEmpty());
     }
 
     @Test
