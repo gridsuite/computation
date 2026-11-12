@@ -14,7 +14,7 @@ import lombok.NonNull;
 import org.apache.commons.collections4.CollectionUtils;
 import org.gridsuite.computation.dto.GlobalFilter;
 import org.gridsuite.computation.dto.ResourceFilterDTO;
-import org.gridsuite.filter.AbstractFilter;
+import org.gridsuite.filter.dto.AbstractFilter;
 import org.gridsuite.filter.globalfilter.AbstractGlobalFilterService;
 import org.gridsuite.filter.utils.EquipmentType;
 import org.springframework.core.ParameterizedTypeReference;
