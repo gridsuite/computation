@@ -19,8 +19,6 @@ public abstract class AbstractComputationResultService<S> {
 
     public abstract void delete(UUID resultUuid);
 
-    public abstract void deleteAll();
-
     public abstract S findStatus(UUID resultUuid);
 
     // --- Must implement these following methods if a computation server supports s3 storage --- //

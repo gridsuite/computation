@@ -122,11 +122,6 @@ class ComputationTest implements WithAssertions {
         }
 
         @Override
-        public void deleteAll() {
-            mockDBStatus.clear();
-        }
-
-        @Override
         public MockComputationStatus findStatus(UUID resultUuid) {
             return mockDBStatus.get(resultUuid);
         }
@@ -382,6 +377,20 @@ class ComputationTest implements WithAssertions {
         workerService.consumeCancel().accept(message);
         assertNull(resultService.findStatus(RESULT_UUID));
         verify(notificationService.getPublisher(), times(1)).send(eq("publishCancelFailed-out-0"), isA(Message.class));
+    }
+
+    @Test
+    void testDeleteResults() {
+        UUID otherResultUuid = UUID.randomUUID();
+        UUID keptResultUuid = UUID.randomUUID();
+        computationService.setStatus(List.of(RESULT_UUID, otherResultUuid, keptResultUuid), MockComputationStatus.COMPLETED);
+
+        assertThrows(NullPointerException.class, () -> computationService.deleteResults(null));
+        computationService.deleteResults(List.of());
+        assertEquals(3, resultService.mockDBStatus.size());
+
+        computationService.deleteResults(List.of(RESULT_UUID, otherResultUuid));
+        assertEquals(Map.of(keptResultUuid, MockComputationStatus.COMPLETED), resultService.mockDBStatus);
     }
 
     @Test
